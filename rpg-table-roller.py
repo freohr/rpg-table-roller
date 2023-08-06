@@ -19,7 +19,10 @@ class table_roller:
         return self.table
 
     def roll_result(self):
-        return random.choices(self.table, k=LOCAL_ARGS.count)
+        if LOCAL_ARGS.exclusive:
+            return random.sample(self.table, k=min(LOCAL_ARGS.count, len(self.table)))
+        else:
+            return random.choices(self.table, k=LOCAL_ARGS.count)
 
 
 def usage():
@@ -37,7 +40,22 @@ def get_parameters():
 
     parser.add_argument(
         "table_filepath", help="path to random table config file")
-    parser.add_argument("-c", "--count", type=int, default=1, dest="count")
+
+    roll_group = parser.add_argument_group("Roll Options")
+    roll_group.add_argument(
+        "-c",
+        "--count",
+        type=int,
+        default=1,
+        dest="count",
+        help="How many rolled results do you want from the table? (defaults to 1 result)",
+    )
+    roll_group.add_argument(
+        "-e",
+        "--exclusive",
+        action="store_true",
+        help="Each result can be rolled at most once",
+    )
 
     global LOCAL_ARGS
     LOCAL_ARGS = parser.parse_args()
