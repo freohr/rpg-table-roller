@@ -6,6 +6,16 @@ import argparse
 from pathlib import Path
 
 
+class table_roller:
+    def __init__(self, table_filepath):
+        with table_filepath.open("r") as table_file:
+            table_content = table_file.read()
+            self.table = [line for line in table_content.split("\n") if line]
+
+    def get_table(self):
+        return self.table
+
+
 def usage():
     print(f"Usage: {sys.argv[0]} <table-file>")
     print("This script loads the random table from the file")
@@ -31,13 +41,7 @@ def get_parameters():
     return table_name
 
 
-def load_table(table_filepath):
-    with table_filepath.open("r") as table_file:
-        table_content = table_file.read()
-        return table_content
-
-
 if __name__ == "__main__":
-    table_name = get_parameters()
-    table_content = load_table(table_name)
-    print(table_content)
+    table_filepath = get_parameters()
+    table_roller = table_roller(table_filepath)
+    print(table_roller.get_table())
