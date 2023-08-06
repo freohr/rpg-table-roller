@@ -2,6 +2,7 @@
 import sys
 import logging
 import os.path
+import argparse
 
 
 def usage():
@@ -11,12 +12,16 @@ def usage():
 
 
 def get_parameters():
-    if len(sys.argv) < 2:
-        logging.warning("Missing the expected the table file as argument.")
-        usage()
-        exit(1)
+    parser = argparse.ArgumentParser(
+        prog="RPG Random Table roller",
+        description="""This program loads the random table from
+                    a configuration file and rolls a random result from it""",
+    )
 
-    table_name = sys.argv[1]
+    parser.add_argument("filename", help="path to random table config file")
+
+    args = parser.parse_args()
+    table_name = args.filename
     if not os.path.isfile(table_name):
         logging.error(f"File '{table_name}' not found.")
         usage()
