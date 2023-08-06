@@ -4,6 +4,7 @@ import logging
 import os.path
 import argparse
 from pathlib import Path
+import random
 
 
 class table_roller:
@@ -14,6 +15,9 @@ class table_roller:
 
     def get_table(self):
         return self.table
+
+    def roll_result(self):
+        return random.choice(self.table)
 
 
 def usage():
@@ -44,4 +48,4 @@ def get_parameters():
 if __name__ == "__main__":
     table_filepath = get_parameters()
     table_roller = table_roller(table_filepath)
-    print(table_roller.get_table())
+    print(table_roller.roll_result())
