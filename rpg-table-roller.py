@@ -6,10 +6,12 @@ import argparse
 from pathlib import Path
 import random
 
+LOCAL_ARGS = None
+
 
 class table_roller:
     def __init__(self, table_filepath):
-        with table_filepath.open("r") as table_file:
+        with Path(table_filepath).open("r") as table_file:
             table_content = table_file.read()
             self.table = [line for line in table_content.split("\n") if line]
 
@@ -17,7 +19,7 @@ class table_roller:
         return self.table
 
     def roll_result(self):
-        return random.choice(self.table)
+        return random.choices(self.table, k=LOCAL_ARGS.count)
 
 
 def usage():
@@ -33,19 +35,24 @@ def get_parameters():
                     a configuration file and rolls a random result from it""",
     )
 
-    parser.add_argument("filename", help="path to random table config file")
+    parser.add_argument(
+        "table_filepath", help="path to random table config file")
+    parser.add_argument("-c", "--count", type=int, default=1, dest="count")
 
-    args = parser.parse_args()
-    table_name = Path(args.filename)
-    if not os.path.isfile(table_name):
-        logging.error(f"File '{table_name}' not found.")
+    global LOCAL_ARGS
+    LOCAL_ARGS = parser.parse_args()
+
+    if not os.path.isfile(LOCAL_ARGS.table_filepath):
+        logging.error(f"File '{LOCAL_ARGS.table_file}' not found.")
         usage()
         exit(2)
 
-    return table_name
+
+def print_results(result_array):
+    [print(result) for result in result_array]
 
 
 if __name__ == "__main__":
-    table_filepath = get_parameters()
-    table_roller = table_roller(table_filepath)
-    print(table_roller.roll_result())
+    get_parameters()
+    table_roller = table_roller(LOCAL_ARGS.table_filepath)
+    print_results(table_roller.roll_result())
