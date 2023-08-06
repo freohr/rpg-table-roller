@@ -3,6 +3,7 @@ import sys
 import logging
 import os.path
 import argparse
+from pathlib import Path
 
 
 def usage():
@@ -21,7 +22,7 @@ def get_parameters():
     parser.add_argument("filename", help="path to random table config file")
 
     args = parser.parse_args()
-    table_name = args.filename
+    table_name = Path(args.filename)
     if not os.path.isfile(table_name):
         logging.error(f"File '{table_name}' not found.")
         usage()
@@ -30,6 +31,13 @@ def get_parameters():
     return table_name
 
 
+def load_table(table_filepath):
+    with table_filepath.open("r") as table_file:
+        table_content = table_file.read()
+        return table_content
+
+
 if __name__ == "__main__":
     table_name = get_parameters()
-    print(f"Found table from file '{table_name}'")
+    table_content = load_table(table_name)
+    print(table_content)
