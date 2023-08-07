@@ -40,11 +40,22 @@ def get_parameters():
 
     parser.add_argument(
         "table_filepath", help="path to random table config file")
-    parser.add_argument(
+
+    output_group = parser.add_argument_group("Output Options")
+
+    output_group.add_argument(
         "-o",
         "--output",
         help="""Text file to output the rolled results.
                 Note: Contents will be overwritten.""",
+    )
+
+    output_group.add_argument(
+        "-a",
+        "--append",
+        action="store_true",
+        help="""Append the rolled results to the output
+                file. No effect when printing to STD""",
     )
 
     roll_group = parser.add_argument_group("Roll Options")
@@ -54,7 +65,8 @@ def get_parameters():
         type=int,
         default=1,
         dest="count",
-        help="How many rolled results do you want from the table? (defaults to 1 result)",
+        help="""How many rolled results do you want from the table?
+                (defaults to 1 result)""",
     )
     roll_group.add_argument(
         "-e",
@@ -74,9 +86,9 @@ def get_parameters():
 
 def print_results(result_array):
     if LOCAL_ARGS.output:
-        with Path(LOCAL_ARGS.output).open("w") as output:
+        output_action = "a" if LOCAL_ARGS.append else "w"
+        with Path(LOCAL_ARGS.output).open(output_action) as output:
             [print(result, file=output) for result in result_array]
-        pass
     else:
         [print(result) for result in result_array]
 
