@@ -40,6 +40,12 @@ def get_parameters():
 
     parser.add_argument(
         "table_filepath", help="path to random table config file")
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="""Text file to output the rolled results.
+                Note: Contents will be overwritten.""",
+    )
 
     roll_group = parser.add_argument_group("Roll Options")
     roll_group.add_argument(
@@ -67,7 +73,12 @@ def get_parameters():
 
 
 def print_results(result_array):
-    [print(result) for result in result_array]
+    if LOCAL_ARGS.output:
+        with Path(LOCAL_ARGS.output).open("w") as output:
+            [print(result, file=output) for result in result_array]
+        pass
+    else:
+        [print(result) for result in result_array]
 
 
 if __name__ == "__main__":
