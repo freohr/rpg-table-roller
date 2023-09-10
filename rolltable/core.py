@@ -8,8 +8,13 @@ from tablehandler import TableRoller
 
 def main():
     args = get_parameters()
-    table_roller = TableRoller(args)
-    print_results(table_roller.get_result(), args.output, args.append)
+    try:
+        table_roller = TableRoller(args)
+    except Exception as exc:
+        print(exc)
+        exit(1)
+    else:
+        print_results(table_roller.get_result(), args.output, args.append)
 
 
 def print_results(result_array, output, append):
@@ -70,6 +75,11 @@ def get_parameters():
         "--dice-formula",
         help="""Custom dice formula to roll on the table.
                 Keep it simple (XdY±Z)""",
+    )
+    roll_group.add_argument(
+        "--clamp",
+        help="Force roll result between first and last element. No effect if not using a custom formula.",
+        action="store_true",
     )
 
     output_group = parser.add_argument_group("Output Options")

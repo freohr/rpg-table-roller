@@ -6,6 +6,10 @@ from pathlib import Path
 import re
 
 
+def clamp(value, min, max):
+    return sorted((min, value, max))[1]
+
+
 class TableRoller:
     def __init__(self, config):
         self.roll_config = types.SimpleNamespace()
@@ -23,13 +27,16 @@ class TableRoller:
         else:
             self.roll_config.formula = f"{config.dice_formula}t"
 
-        if (
-            dice.roll_max(self.roll_config.formula) > len(self.table)
-            or dice.roll_min(self.roll_config.formula) < 0
-        ):
-            raise IndexError(
-                """The supplied dice formula should not roll higher than the number of entries on the table or lower than 0"""
-            )
+        self.roll_config.clamp = config.clamp
+
+        if not self.roll_config.clamp:
+            roll_max = dice.roll_max(self.roll_config.formula)
+            roll_min = dice.roll_min(self.roll_config.formula)
+            if roll_max > len(self.table) or roll_min < 0:
+                raise IndexError(
+                    f"""The supplied dice formula should not roll higher than the number of entries on the table or lower than 0.
+Formula min is {roll_min}, formula max is {roll_max}, and table count is {len(self.table)}"""
+                )
 
     def get_default_result(self):
         if self.roll_config.exclusive:
@@ -40,8 +47,17 @@ class TableRoller:
             return random.choices(self.table, k=self.roll_config.count)
 
     def get_formula_result(self):
+        def local_formula(do_clamp, formula):
+            if do_clamp:
+                return clamp(
+                    dice.roll(self.roll_config.formula), 0, len(self.table) - 2
+                )
+            else:
+                return dice.roll(self.roll_config.formula) - 1
+
         results = [
-            self.table[dice.roll(self.roll_config.formula) - 1]
+            self.table[local_formula(
+                self.roll_config.clamp, self.roll_config.formula)]
             for _ in range(self.roll_config.count)
         ]
         return results
