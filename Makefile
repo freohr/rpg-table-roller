@@ -1,4 +1,4 @@
-dist/rolltable: **/*.py
+dist/rolltable: clean **/*.py
 	pyinstaller -n rolltable -F rolltable/__main__.py
 
 clean:
@@ -9,4 +9,7 @@ init:
 	
 test:
 	pytest
+
+install: dist/rolltable
+	install-local-bin dist/rolltable
 

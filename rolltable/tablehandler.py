@@ -17,8 +17,7 @@ class TableRoller:
         self.roll_config.exclusive = config.exclusive
 
         self.table = (
-            parse_table_list(
-                config.table_filepath) if config.table_filepath else None
+            parse_table_list(config.table_filepath) if config.table_filepath else None
         )
 
         if not config.dice_formula:
@@ -56,8 +55,7 @@ Formula min is {roll_min}, formula max is {roll_max}, and table count is {len(se
                 return dice.roll(self.roll_config.formula) - 1
 
         results = [
-            self.table[local_formula(
-                self.roll_config.clamp, self.roll_config.formula)]
+            self.table[local_formula(self.roll_config.clamp, self.roll_config.formula)]
             for _ in range(self.roll_config.count)
         ]
         return results
@@ -85,6 +83,8 @@ def parse_table_list(table_filepath):
     with Path(table_filepath).open("r") as table_file:
         table_content = table_file.read()
         table = [
-            line for line in table_content.split("\n") if not is_line_comment(line)
+            line
+            for line in table_content.split("\n")
+            if not is_line_comment(line) and not line == ""
         ]
         return table
