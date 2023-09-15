@@ -1,20 +1,26 @@
 #! python
-import os
 import sys
 import argparse
 from pathlib import Path
-from tablehandler import TableRoller
+from randomtable import RandomTable
+from chancetable import ChanceTable
 
 
 def main():
     args = get_parameters()
+    table = None
+
     try:
-        table_roller = TableRoller(args)
+        if args.format == "list":
+            table = RandomTable(args)
+        elif args.format == "chance":
+            table = ChanceTable(args)
     except Exception as exc:
         print(exc)
         exit(1)
     else:
-        print_results(table_roller.get_result(), args.output, args.append)
+        if table:
+            print_results(table.get_results(), args.output, args.append)
 
 
 def print_results(result_array, output, append):
@@ -47,11 +53,12 @@ def get_parameters():
         "--format",
         help="""Format for the table file content.
         Options are:
-        - 'list' [default] (contains each item as a straight simple list with comments)\n
+        - 'list' [default]: contains each item as a straight simple list with comments\n
+        - 'chance':  each item has a chance to appears in the results, usually as a percentage\n
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
-        choices=["list"],
+        choices=["list", "chance"],
     )
 
     roll_group = parser.add_argument_group("Roll Options")
