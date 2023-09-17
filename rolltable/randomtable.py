@@ -19,10 +19,13 @@ class RandomTable(tableloader.TableLoader):
     def get_formula_result(self):
         results = [
             self.table[
-                clamp(dice.roll(f"{self.roll_config.formula}t"),
-                      0, len(self.table) - 2)
+                clamp(
+                    int(dice.roll(f"{self.roll_config.formula}")) - 1,
+                    0,
+                    len(self.table) - 1,
+                )
                 if self.roll_config.clamp
-                else dice.roll(f"{self.roll_config.formula}t") - 1
+                else int(dice.roll(f"{self.roll_config.formula}")) - 1
             ]
             for _ in range(self.roll_config.count)
         ]

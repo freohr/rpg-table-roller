@@ -20,8 +20,8 @@ class TableLoader:
         self.roll_config.clamp = config.clamp
 
         if not self.roll_config.clamp:
-            roll_max = dice.roll_max(self.roll_config.formula)
-            roll_min = dice.roll_min(self.roll_config.formula)
+            roll_max = int(dice.roll_max(self.roll_config.formula))
+            roll_min = int(dice.roll_min(self.roll_config.formula))
             if roll_max > len(self.table) or roll_min < 0:
                 raise IndexError(
                     f"""The supplied dice formula should not roll higher than the number of entries on the table or lower than 0.
