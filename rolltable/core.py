@@ -1,15 +1,26 @@
 #! python
-import os
 import sys
 import argparse
 from pathlib import Path
-from tablehandler import TableRoller
+from randomtable import RandomTable
+from chancetable import ChanceTable
 
 
 def main():
     args = get_parameters()
-    table_roller = TableRoller(args)
-    print_results(table_roller.get_result(), args.output, args.append)
+    table = None
+
+    try:
+        if args.format == "list":
+            table = RandomTable(args)
+        elif args.format == "chance":
+            table = ChanceTable(args)
+    except Exception as exc:
+        print(exc)
+        exit(1)
+    else:
+        if table:
+            print_results(table.get_results(), args.output, args.append)
 
 
 def print_results(result_array, output, append):
@@ -35,18 +46,18 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument(
-        "table_filepath", help="path to random table config file")
+    input_group.add_argument("table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",
         help="""Format for the table file content.
         Options are:
-        - 'list' [default] (contains each item as a straight simple list with comments)\n
+        - 'list' [default]: contains each item as a straight simple list with comments\n
+        - 'chance':  each item has a chance to appears in the results, usually as a percentage\n
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
-        choices=["list"],
+        choices=["list", "chance"],
     )
 
     roll_group = parser.add_argument_group("Roll Options")
@@ -70,6 +81,11 @@ def get_parameters():
         "--dice-formula",
         help="""Custom dice formula to roll on the table.
                 Keep it simple (XdY±Z)""",
+    )
+    roll_group.add_argument(
+        "--clamp",
+        help="Force roll result between first and last element. No effect if not using a custom formula.",
+        action="store_true",
     )
 
     output_group = parser.add_argument_group("Output Options")
