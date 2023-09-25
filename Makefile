@@ -11,5 +11,5 @@ test:
 	pytest
 
 install: dist/rolltable
-	cp dist/rolltable -t "${XDG_USER_BIN_HOME:-~/.local/bin}/"
+	cp -v dist/rolltable -t "${HOME}/.local/bin/"
 
