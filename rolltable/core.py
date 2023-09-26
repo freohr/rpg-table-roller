@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from randomtable import RandomTable
 from chancetable import ChanceTable
+import inliner
 
 
 def main():
@@ -23,13 +24,16 @@ def main():
             print_results(table.get_results(), args.output, args.append)
 
 
-def print_results(result_array, output, append):
-    if output:
-        output_action = "a" if append else "w"
-        with Path(output).open(output_action) as output:
-            [print(result, file=output) for result in result_array]
-    else:
-        [print(result) for result in result_array]
+def print_results(result_array, output=None, append=False):
+    write_to = Path(output).open("a" if append else "w") if output else None
+
+    [
+        print(inliner.insert_inline_dice_roll(result), file=write_to)
+        for result in result_array
+    ]
+
+    if write_to:
+        write_to.close()
 
 
 def usage():
@@ -46,7 +50,8 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument("table_filepath", help="path to random table config file")
+    input_group.add_argument(
+        "table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",
