@@ -4,8 +4,10 @@ import dice
 
 
 class ChanceTable(tableloader.TableLoader):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(
+        self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
+    ):
+        super().__init__(filepath, count, exclusive, clamp, dice_formula)
 
     def load_table(self, table_path):
         if not Path(table_path).is_file():
@@ -14,8 +16,7 @@ class ChanceTable(tableloader.TableLoader):
         with Path(table_path).open("r") as table_file:
             table_content = table_file.read()
 
-            loaded_table = [split_line(line)
-                            for line in table_content.splitlines()]
+            loaded_table = [split_line(line) for line in table_content.splitlines()]
 
         return loaded_table
 

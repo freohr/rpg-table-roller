@@ -4,7 +4,7 @@ import argparse
 from pathlib import Path
 from randomtable import RandomTable
 from chancetable import ChanceTable
-import inliner
+from inliner import TableInliner
 
 
 def main():
@@ -13,24 +13,45 @@ def main():
 
     try:
         if args.format == "list":
-            table = RandomTable(args)
+            table = RandomTable(
+                args.table_filepath,
+                args.count,
+                args.exclusive,
+                args.clamp,
+                args.dice_formula,
+            )
         elif args.format == "chance":
-            table = ChanceTable(args)
+            table = ChanceTable(
+                args.table_filepath,
+                args.count,
+                args.exclusive,
+                args.clamp,
+                args.dice_formula,
+            )
     except Exception as exc:
         print(exc)
         exit(1)
     else:
         if table:
-            print_results(table.get_results(), args.output, args.append)
+            base_table_folder = Path(args.table_filepath).parent
+
+            recursive_table_inliner = TableInliner(base_table_folder)
+
+            processed_results = [
+                recursive_table_inliner.roll_inline_tables(result)
+                for result in table.get_results()
+            ]
+
+            print_results(processed_results, args.output, args.append)
+        else:
+            exit(1)
 
 
 def print_results(result_array, output=None, append=False):
     write_to = Path(output).open("a" if append else "w") if output else None
 
-    [
-        print(inliner.insert_inline_dice_roll(result), file=write_to)
-        for result in result_array
-    ]
+    for result in result_array:
+        print(result, file=write_to)
 
     if write_to:
         write_to.close()
@@ -50,8 +71,7 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument(
-        "table_filepath", help="path to random table config file")
+    input_group.add_argument("table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",

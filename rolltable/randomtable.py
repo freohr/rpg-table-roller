@@ -5,8 +5,10 @@ import tableloader
 
 
 class RandomTable(tableloader.TableLoader):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(
+        self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
+    ):
+        super().__init__(filepath, count, exclusive, clamp, dice_formula)
 
     def get_results(self):
         if self.roll_config.formula:
