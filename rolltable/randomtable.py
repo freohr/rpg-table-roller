@@ -35,14 +35,14 @@ class RandomTable(tableloader.TableLoader):
                     0,
                     len(self.table) - 1,
                 )
-                for i in range(1, self.roll_config.count)
+                for i in range(self.roll_config.count)
             ]
             if self.roll_config.exclusive:
                 rolled_indices = set(rolled_indices)
         else:
             rolled_indices = [
                 int(dice.roll(f"{self.roll_config.formula}")) - 1
-                for i in range(0, self.roll_config.count)
+                for i in range(self.roll_config.count)
             ]
 
             if self.roll_config.exclusive:

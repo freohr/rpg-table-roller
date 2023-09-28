@@ -24,9 +24,12 @@ class ChanceTable(tableloader.TableLoader):
         dice_formula = self.roll_config.formula or "d100"
 
         results = [
-            result
-            for entry, chance in self.table
-            if (result := roll_occurence(entry, dice_formula, chance))
+            [
+                result
+                for entry, chance in self.table
+                if (result := roll_occurence(entry, dice_formula, chance))
+            ]
+            for i in range(self.roll_config.count)
         ]
 
         return results

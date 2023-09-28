@@ -37,24 +37,47 @@ def main():
 
             recursive_table_inliner = TableInliner()
 
-            processed_results = [
-                recursive_table_inliner.roll_inline_tables(result, base_table_folder)
-                for result in table.get_results()
-            ]
+            processed_results = process_inline_tables(
+                table.get_results(), recursive_table_inliner, base_table_folder
+            )
 
-            print_results(processed_results, args.output, args.append)
+            open_writing_device(processed_results, args.output, args.append, args.join)
         else:
             exit(1)
 
 
-def print_results(result_array, output=None, append=False):
+def process_inline_tables(results, inliner, base_folder):
+    if isinstance(results, str):
+        return inliner.roll_inline_tables(results, base_folder)
+    else:
+        return [
+            process_inline_tables(result, inliner, base_folder) for result in results
+        ]
+
+
+def open_writing_device(
+    result_array, output=None, append=False, joiner: str = None, file_to_write=None
+):
     write_to = Path(output).open("a" if append else "w") if output else None
 
-    for result in result_array:
-        print(result, file=write_to)
+    print_results(result_array, joiner, write_to)
 
     if write_to:
         write_to.close()
+
+
+def print_results(result_array, joiner: str = None, write_output=None):
+    if isinstance(result_array[0], list):
+        for result in result_array:
+            print_results(result, joiner, write_output)
+        return
+
+    if joiner:
+        printed_string = joiner.join(result_array)
+        print(printed_string, file=write_output)
+    else:
+        for result in result_array:
+            print(result, file=write_output)
 
 
 def usage():
@@ -126,6 +149,12 @@ def get_parameters():
         action="store_true",
         help="""Append the rolled results to the output
                     file. No effect when printing to STD""",
+    )
+    output_group.add_argument(
+        "-j",
+        "--join",
+        type=str,
+        help="Join the result as a single line string in the output with the provided string",
     )
 
     args = parser.parse_args()
