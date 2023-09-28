@@ -15,8 +15,10 @@ def insert_inline_dice_roll(string):
 
 
 class InlineTableInfo:
-    def __init__(self, path="", exclusive=False, clamp=False, formula="", count=1):
-        self.table_path = path
+    def __init__(
+        self, canonical_path: Path, exclusive=False, clamp=False, formula="", count=1
+    ):
+        self.table_path = canonical_path
         self.exclusive = exclusive
         self.clamp = clamp
         self.formula = formula
@@ -47,20 +49,15 @@ class TableReferenceCounter:
 
 
 class TableInliner:
-    def __init__(self, relative_base_path):
-        self.relative_base_path = relative_base_path
+    def __init__(self):
         self.loaded_tables = dict()
         pass
 
     def load_inlined_table(self, table_info: InlineTableInfo, count):
         if table_info.table_path not in self.loaded_tables:
-            path = None
-            if Path(table_info.table_path).is_absolute():
-                path = table_info.table_path
-            else:
-                path = Path(self.relative_base_path) / table_info.table_path
-
-            self.loaded_tables[table_info.table_path] = RandomTable(path)
+            self.loaded_tables[table_info.table_path] = RandomTable(
+                table_info.table_path
+            )
 
         table = self.loaded_tables[table_info.table_path]
         table.set_flag("exclusive", table_info.exclusive)
@@ -78,13 +75,18 @@ class TableInliner:
         table.set_flag("count", 1)
 
     @staticmethod
-    def parse_inline_table_info(extracted_inlined_table):
+    def parse_inline_table_info(extracted_inlined_table, current_table_folder: Path):
         table_rolling_info = re.compile(
             r"\[\[(?P<table_path>[^:]+)(((?P<exclusive>:e)|(?P<clamp>:cl)|(?P<count>:c(?P<roll_count>\d+))|(?P<formula>:d(?P<inline_formula>[^:]+)))*)]]"
         )
         parsed_info = table_rolling_info.match(extracted_inlined_table)
+
+        inline_table_path = (
+            current_table_folder / parsed_info.group("table_path")
+        ).resolve()
+
         return InlineTableInfo(
-            parsed_info.group("table_path"),
+            inline_table_path,
             True if parsed_info.group("exclusive") else False,
             True if parsed_info.group("clamp") else False,
             parsed_info.group("inline_formula")
@@ -92,7 +94,7 @@ class TableInliner:
             else None,
         )
 
-    def roll_inline_tables(self, rolled_result):
+    def roll_inline_tables(self, rolled_result, current_table_folder: Path):
         inline_extractor = re.compile(r"(\[\[[^\[]+]])")
 
         inlined_elements = inline_extractor.findall(rolled_result)
@@ -108,7 +110,7 @@ class TableInliner:
         parsed_tables = dict()
 
         for index, result in enumerate(inlined_elements):
-            table_info = self.parse_inline_table_info(result)
+            table_info = self.parse_inline_table_info(result, current_table_folder)
 
             if table_info not in parsed_tables:
                 parsed_tables[table_info] = TableReferenceCounter()
@@ -121,13 +123,15 @@ class TableInliner:
             results = table.get_results()
 
             for index, result in enumerate(results):
+                while (
+                    replaced_result := self.roll_inline_tables(
+                        result, table_info.table_path.parent
+                    )
+                ) != result:
+                    result = replaced_result
+
                 rolled_result = rolled_result.replace(
                     inlined_elements[ref_count.indices[index]], result, 1
                 )
-
-        while (
-            replaced_string := self.roll_inline_tables(rolled_result)
-        ) != rolled_result:
-            rolled_result = replaced_string
 
         return rolled_result

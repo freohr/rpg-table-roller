@@ -33,12 +33,12 @@ def main():
         exit(1)
     else:
         if table:
-            base_table_folder = Path(args.table_filepath).parent
+            base_table_folder = Path(args.table_filepath).parent.resolve()
 
-            recursive_table_inliner = TableInliner(base_table_folder)
+            recursive_table_inliner = TableInliner()
 
             processed_results = [
-                recursive_table_inliner.roll_inline_tables(result)
+                recursive_table_inliner.roll_inline_tables(result, base_table_folder)
                 for result in table.get_results()
             ]
 
