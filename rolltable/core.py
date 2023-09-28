@@ -67,6 +67,10 @@ def open_writing_device(
 
 
 def print_results(result_array, joiner: str = None, write_output=None):
+    if not result_array:
+        print("", file=write_output)
+        return
+
     if isinstance(result_array[0], list):
         for result in result_array:
             print_results(result, joiner, write_output)
