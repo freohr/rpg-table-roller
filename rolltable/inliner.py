@@ -77,7 +77,8 @@ class TableInliner:
         table.set_flag("formula", "")
         table.set_flag("count", 1)
 
-    def parse_inline_table_info(self, extracted_inlined_table):
+    @staticmethod
+    def parse_inline_table_info(extracted_inlined_table):
         table_rolling_info = re.compile(
             r"\[\[(?P<table_path>[^:]+)(((?P<exclusive>:e)|(?P<clamp>:cl)|(?P<count>:c(?P<roll_count>\d+))|(?P<formula>:d(?P<inline_formula>[^:]+)))*)]]"
         )
@@ -90,7 +91,6 @@ class TableInliner:
             if parsed_info.group("formula")
             else None,
         )
-        pass
 
     def roll_inline_tables(self, rolled_result):
         inline_extractor = re.compile(r"(\[\[[^\[]+]])")
