@@ -79,7 +79,7 @@ class TableInliner:
 
     def parse_inline_table_info(self, extracted_inlined_table):
         table_rolling_info = re.compile(
-            r"\[\[(?P<table_path>[^:]+)(((?P<exclusive>:e)|(?P<clamp>:c)|(?P<formula>:d(?P<inline_formula>[^:]+)))*)]]"
+            r"\[\[(?P<table_path>[^:]+)(((?P<exclusive>:e)|(?P<clamp>:cl)|(?P<count>:c(?P<roll_count>\d+))|(?P<formula>:d(?P<inline_formula>[^:]+)))*)]]"
         )
         parsed_info = table_rolling_info.match(extracted_inlined_table)
         return InlineTableInfo(
