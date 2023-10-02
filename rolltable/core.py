@@ -5,6 +5,7 @@ from pathlib import Path
 from randomtable import RandomTable
 from chancetable import ChanceTable
 from inliner import TableInliner
+import __version__
 
 
 def main():
@@ -95,6 +96,10 @@ def get_parameters():
         prog="rolltable",
         description="""This program loads the random table from
                     a configuration file and rolls a random result from it""",
+    )
+
+    parser.add_argument(
+        "-v", "--version", action="version", version=__version__.__version__
     )
 
     input_group = parser.add_argument_group("Input Options")

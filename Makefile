@@ -13,3 +13,5 @@ test:
 install: dist/rolltable
 	cp -v dist/rolltable -t "${HOME}/.local/bin/"
 
+release: dist/rolltable
+	scripts/create-release.sh
