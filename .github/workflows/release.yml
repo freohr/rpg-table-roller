@@ -1,0 +1,21 @@
+name: Create new release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: configure
+        run: make init
+      - name: create binary
+        run: make
+      - uses: ncipollo/release-action@v1
+        with:
+          generateReleaseNotes: true
+          artifacts: dist/rolltable
+          token: ${{ secrets.ACCESS_TOKEN }}

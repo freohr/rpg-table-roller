@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from randomtable import RandomTable
 from chancetable import ChanceTable
+from inliner import TableInliner
 
 
 def main():
@@ -12,24 +13,75 @@ def main():
 
     try:
         if args.format == "list":
-            table = RandomTable(args)
+            table = RandomTable(
+                args.table_filepath,
+                args.count,
+                args.exclusive,
+                args.clamp,
+                args.dice_formula,
+            )
         elif args.format == "chance":
-            table = ChanceTable(args)
+            table = ChanceTable(
+                args.table_filepath,
+                args.count,
+                args.exclusive,
+                args.clamp,
+                args.dice_formula,
+            )
     except Exception as exc:
         print(exc)
         exit(1)
     else:
         if table:
-            print_results(table.get_results(), args.output, args.append)
+            base_table_folder = Path(args.table_filepath).parent.resolve()
+
+            recursive_table_inliner = TableInliner()
+
+            processed_results = process_inline_tables(
+                table.get_results(), recursive_table_inliner, base_table_folder
+            )
+
+            open_writing_device(processed_results, args.output, args.append, args.join)
+        else:
+            exit(1)
 
 
-def print_results(result_array, output, append):
-    if output:
-        output_action = "a" if append else "w"
-        with Path(output).open(output_action) as output:
-            [print(result, file=output) for result in result_array]
+def process_inline_tables(results, inliner, base_folder):
+    if isinstance(results, str):
+        return inliner.roll_inline_tables(results, base_folder)
     else:
-        [print(result) for result in result_array]
+        return [
+            process_inline_tables(result, inliner, base_folder) for result in results
+        ]
+
+
+def open_writing_device(
+    result_array, output=None, append=False, joiner: str = None, file_to_write=None
+):
+    write_to = Path(output).open("a" if append else "w") if output else None
+
+    print_results(result_array, joiner, write_to)
+
+    if write_to:
+        write_to.close()
+
+
+def print_results(result_array, joiner: str = None, write_output=None):
+    if not result_array:
+        print("", file=write_output)
+        return
+
+    if isinstance(result_array[0], list):
+        for result in result_array:
+            print_results(result, joiner, write_output)
+        return
+
+    if joiner:
+        printed_string = joiner.join(result_array)
+        print(printed_string, file=write_output)
+    else:
+        for result in result_array:
+            print(result, file=write_output)
 
 
 def usage():
@@ -101,6 +153,12 @@ def get_parameters():
         action="store_true",
         help="""Append the rolled results to the output
                     file. No effect when printing to STD""",
+    )
+    output_group.add_argument(
+        "-j",
+        "--join",
+        type=str,
+        help="Join the result as a single line string in the output with the provided string",
     )
 
     args = parser.parse_args()

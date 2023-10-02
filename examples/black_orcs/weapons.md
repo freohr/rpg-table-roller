@@ -1,0 +1,6 @@
+Scimitar (d8) and Shield (AC +1)
+Spear (d8, reach) and Shield (AC +1)
+Shortsword (d6) and Shortbow (d6, ranged)
+Scimitar (d8) and Hand Axe (d6)
+Scimitar (d8) and Shortbow (d6, ranged)
+Halberd (d10, reach, +1 dmg on crit) and Dagger (d4, throw)
