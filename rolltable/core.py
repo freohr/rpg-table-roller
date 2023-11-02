@@ -4,6 +4,7 @@ import argparse
 from pathlib import Path
 from randomtable import RandomTable
 from chancetable import ChanceTable
+from hexflower.hexflower import Hexflower
 from inliner import TableInliner
 import __version__
 
@@ -29,6 +30,8 @@ def main():
                 args.clamp,
                 args.dice_formula,
             )
+        elif args.format == "hexflower":
+            table = Hexflower(args.table_filepath, args.count, args.start)
     except Exception as exc:
         print(exc)
         exit(1)
@@ -42,7 +45,8 @@ def main():
                 table.get_results(), recursive_table_inliner, base_table_folder
             )
 
-            open_writing_device(processed_results, args.output, args.append, args.join)
+            open_writing_device(processed_results,
+                                args.output, args.append, args.join)
         else:
             exit(1)
 
@@ -103,7 +107,8 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument("table_filepath", help="path to random table config file")
+    input_group.add_argument(
+        "table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",
@@ -111,10 +116,11 @@ def get_parameters():
         Options are:
         - 'list' [default]: contains each item as a straight simple list with comments\n
         - 'chance':  each item has a chance to appears in the results, usually as a percentage\n
+        - 'hexflower': the table is represented as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation\n
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
-        choices=["list", "chance"],
+        choices=["list", "chance", "hexflower"],
     )
 
     roll_group = parser.add_argument_group("Roll Options")
@@ -145,6 +151,14 @@ def get_parameters():
         action="store_true",
     )
 
+    hexflower_group = parser.add_argument_group("Hex-flower Options")
+    hexflower_group.add_argument(
+        "-s",
+        "--start",
+        type=int,
+        help="Change the hex number that navigation starts from",
+    )
+
     output_group = parser.add_argument_group("Output Options")
     output_group.add_argument(
         "-o",
@@ -157,13 +171,13 @@ def get_parameters():
         "--append",
         action="store_true",
         help="""Append the rolled results to the output
-                    file. No effect when printing to STD""",
+                    file. No effect when printing to STDOUT""",
     )
     output_group.add_argument(
         "-j",
         "--join",
         type=str,
-        help="Join the result as a single line string in the output with the provided string",
+        help="Join the result as a single line string in the output with the provided string. Useful when rolling multiple times on the same chance table, as the results will be aggregated for each set of rolls on the provided table.",
     )
 
     args = parser.parse_args()
