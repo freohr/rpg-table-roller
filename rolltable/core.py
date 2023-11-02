@@ -171,13 +171,13 @@ def get_parameters():
         "--append",
         action="store_true",
         help="""Append the rolled results to the output
-                    file. No effect when printing to STD""",
+                    file. No effect when printing to STDOUT""",
     )
     output_group.add_argument(
         "-j",
         "--join",
         type=str,
-        help="Join the result as a single line string in the output with the provided string",
+        help="Join the result as a single line string in the output with the provided string. Useful when rolling multiple times on the same chance table, as the results will be aggregated for each set of rolls on the provided table.",
     )
 
     args = parser.parse_args()
