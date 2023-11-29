@@ -53,17 +53,13 @@ class RandomTable(tableloader.TableLoader):
         return results
 
     def load_table(self, table_path):
-        if not Path(table_path).is_file():
-            raise FileNotFoundError(f"Table file '{table_path}' not found.")
-
-        with Path(table_path).open("r") as table_file:
-            table_content = table_file.readlines()
-            table = [
-                line.strip()
-                for line in table_content
-                if not tableloader.is_line_comment(line) and not line.strip() == ""
-            ]
-            return table
+        table_content = tableloader.get_table_lines(table_path)
+        table = [
+            line.strip()
+            for line in table_content
+            if not tableloader.is_line_comment(line) and not line.strip() == ""
+        ]
+        return table
 
 
 def clamp(value, min, max):

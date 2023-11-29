@@ -6,6 +6,7 @@ from randomtable import RandomTable
 from chancetable import ChanceTable
 from hexflower.hexflower import Hexflower
 from inliner import TableInliner
+from weightedlisttable import WeightedListTable
 import __version__
 
 
@@ -32,6 +33,15 @@ def main():
             )
         elif args.format == "hexflower":
             table = Hexflower(args.table_filepath, args.count, args.start)
+        elif args.format == "weighted-list":
+            table = WeightedListTable(
+                args.table_filepath,
+                args.count,
+                args.exclusive,
+                args.clamp,
+                args.dice_formula,
+            )
+            pass
     except Exception as exc:
         print(exc)
         exit(1)
@@ -41,12 +51,12 @@ def main():
 
             recursive_table_inliner = TableInliner()
 
+            raw_results = table.get_results()
             processed_results = process_inline_tables(
-                table.get_results(), recursive_table_inliner, base_table_folder
+                raw_results, recursive_table_inliner, base_table_folder
             )
 
-            open_writing_device(processed_results,
-                                args.output, args.append, args.join)
+            open_writing_device(processed_results, args.output, args.append, args.join)
         else:
             exit(1)
 
@@ -107,8 +117,7 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument(
-        "table_filepath", help="path to random table config file")
+    input_group.add_argument("table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",
@@ -117,10 +126,11 @@ def get_parameters():
         - 'list' [default]: contains each item as a straight simple list with comments\n
         - 'chance':  each item has a chance to appears in the results, usually as a percentage\n
         - 'hexflower': the table is represented as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation\n
+        - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected\n
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
-        choices=["list", "chance", "hexflower"],
+        choices=["list", "chance", "hexflower", "weighted-list"],
     )
 
     roll_group = parser.add_argument_group("Roll Options")
