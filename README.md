@@ -24,6 +24,7 @@ Input Options:
                         - 'list' [default]: contains each item as a straight simple list with comments 
                         - 'chance': each item has a chance to appears in the results, usually as a percentage. Treasures tables from old-school D&D use this format.
                         - 'hexflower': the table is represented in json as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation 
+                        - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected. Does not support custom dice formulae for now.
                         See the 'examples/' folder in the github repo (github.com/freohr/rpg-table-roller) for example table files of the supported formats.
 
 Roll Options:
@@ -41,8 +42,8 @@ Hex-flower Options:
 Output Options:
   -o OUTPUT, --output OUTPUT
                         Text file to output the rolled results. Note: Contents will be overwritten.
--a, --append            Append the rolled results to the output file. No effect when printing to STDOUT
--j JOIN, --join JOIN    Join the result as a single line string in the output with the provided string. Useful when rolling multiple times on the same chance table, as the results will be aggregated for each set of rolls on the provided table.
+  -a, --append          Append the rolled results to the output file. No effect when printing to STDOUT
+  -j JOIN, --join JOIN  Join the result as a single line string in the output with the provided string. Useful when rolling multiple times on the same chance table, as the results will be aggregated for each set of rolls on the provided table.
 ```
 
 Example tables are in the [`examples/`](examples/) folder in this repo.
@@ -64,6 +65,7 @@ The inline recursive table roller can be further customized with colon options, 
 - `:e`: Force the rolled results to be *exclusive* when the inline table is present twice or more in the same initial result. Note that this only applies for inline replacement in a single result and if the inline table is referenced more than once.
 - `:d` followed by a number or a dice-notation string: Change the dice formula used to rolled on the inline table.
 - `:cl`: Clamp the inlined results to the values present on the inline table. Same as the `--clamp` option on the command-line, it only has an effect when combined with a custom dice formula.
+- `:f` followed by the name of one of the format: Specifies the list format of the inlined list
 - `:c` followed by a number or a dice-notation string: Change the number of results rolled from 1 to many, to inline multiple results. Does not do anything right now, I need to implement a `:j` option to join multiple results before inlining them.
 
 Those options can be combined (and the `:cl` option doesn't even do anything on its own) to further specify the behavior of the roller for this specific inlined result. For example, if you want one of your results to be `Roll twice on this table, rerolling duplicates`, you can have the last result (of your arbitraty 10 results for example) written as `[[this-table:e:dd9]] and [[this-table:e:dd9]]` to enable a 1-in-10 reroll on this table, selecting two exclusive results that are not the reroll.

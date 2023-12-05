@@ -1,6 +1,8 @@
 import dice
 import re
 from randomtable import RandomTable
+from chancetable import ChanceTable
+from weightedlisttable import WeightedListTable
 from pathlib import Path
 
 
@@ -16,9 +18,16 @@ def insert_inline_dice_roll(string):
 
 class InlineTableInfo:
     def __init__(
-        self, canonical_path: Path, exclusive=False, clamp=False, formula="", count=1
+        self,
+        canonical_path: Path,
+        format="list",
+        exclusive=False,
+        clamp=False,
+        formula="",
+        count=1,
     ):
         self.table_path = canonical_path
+        self.format = format
         self.exclusive = exclusive
         self.clamp = clamp
         self.formula = formula
@@ -27,6 +36,7 @@ class InlineTableInfo:
     def __eq__(self, other):
         return (
             self.table_path == other.table_path
+            and self.format == other.format
             and self.exclusive == other.exclusive
             and self.clamp == other.clamp
             and self.formula == other.formula
@@ -48,6 +58,19 @@ class TableReferenceCounter:
         pass
 
 
+def create_table(table_info):
+    if not table_info.format or table_info.format == "list":
+        return RandomTable(table_info.table_path)
+    elif table_info.format == "chance":
+        return ChanceTable(table_info.table_path)
+    elif table_info.format == "weighted-list":
+        return WeightedListTable(table_info.table_path)
+    else:
+        raise ValueError(
+            f"Unknown table format {table_info.format} for inline table {table_info.table_path}"
+        )
+
+
 class TableInliner:
     def __init__(self):
         self.loaded_tables = dict()
@@ -55,9 +78,7 @@ class TableInliner:
 
     def load_inlined_table(self, table_info: InlineTableInfo, count):
         if table_info.table_path not in self.loaded_tables:
-            self.loaded_tables[table_info.table_path] = RandomTable(
-                table_info.table_path
-            )
+            self.loaded_tables[table_info.table_path] = create_table(table_info)
 
         table = self.loaded_tables[table_info.table_path]
         table.set_flag("exclusive", table_info.exclusive)
@@ -76,10 +97,13 @@ class TableInliner:
 
     @staticmethod
     def parse_inline_table_info(extracted_inlined_table, current_table_folder: Path):
-        table_rolling_info = re.compile(
-            r"\[\[(?P<table_path>[^:]+)(((?P<exclusive>:e)|(?P<clamp>:cl)|(?P<count>:c(?P<roll_count>\d+))|(?P<formula>:d(?P<inline_formula>[^:]+)))*)]]"
-        )
-        parsed_info = table_rolling_info.match(extracted_inlined_table)
+        table_rolling_info_parser = None
+        if not table_rolling_info_parser:
+            table_rolling_info_parser = re.compile(
+                r"\[\[(?P<table_path>[^:]+)((?P<exclusive>:e)|(?P<clamp>:cl)|(?P<count>:c(?P<roll_count>\d+))|(?P<formula>:d(?P<inline_formula>[^:]+))|(?P<format>:f(?P<inline_format>list|chance|weighted)))*]]"
+            )
+
+        parsed_info = table_rolling_info_parser.match(extracted_inlined_table)
 
         inline_table_path = (
             current_table_folder / parsed_info.group("table_path")
@@ -87,6 +111,7 @@ class TableInliner:
 
         return InlineTableInfo(
             inline_table_path,
+            parsed_info.group("inline_format") if parsed_info.group("format") else None,
             True if parsed_info.group("exclusive") else False,
             True if parsed_info.group("clamp") else False,
             parsed_info.group("inline_formula")
