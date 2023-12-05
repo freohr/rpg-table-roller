@@ -126,7 +126,7 @@ def get_parameters():
         - 'list' [default]: contains each item as a straight simple list with comments\n
         - 'chance':  each item has a chance to appears in the results, usually as a percentage\n
         - 'hexflower': the table is represented as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation\n
-        - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected\n
+        - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected. Does not support custom dice formulae for now\n
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
@@ -153,7 +153,7 @@ def get_parameters():
         "-d",
         "--dice-formula",
         help="""Custom dice formula to roll on the table.
-                Keep it simple (XdY±Z)""",
+                Keep it simple (XdY±Z). See the python `dice` package for additional notation format""",
     )
     roll_group.add_argument(
         "--clamp",

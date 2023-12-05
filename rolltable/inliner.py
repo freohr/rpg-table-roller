@@ -18,13 +18,13 @@ def insert_inline_dice_roll(string):
 
 class InlineTableInfo:
     def __init__(
-            self,
-            canonical_path: Path,
-            format="list",
-            exclusive=False,
-            clamp=False,
-            formula="",
-            count=1,
+        self,
+        canonical_path: Path,
+        format="list",
+        exclusive=False,
+        clamp=False,
+        formula="",
+        count=1,
     ):
         self.table_path = canonical_path
         self.format = format
@@ -35,11 +35,11 @@ class InlineTableInfo:
 
     def __eq__(self, other):
         return (
-                self.table_path == other.table_path
-                and self.format == other.format
-                and self.exclusive == other.exclusive
-                and self.clamp == other.clamp
-                and self.formula == other.formula
+            self.table_path == other.table_path
+            and self.format == other.format
+            and self.exclusive == other.exclusive
+            and self.clamp == other.clamp
+            and self.formula == other.formula
         )
 
     def __hash__(self):
@@ -63,7 +63,7 @@ def create_table(table_info):
         return RandomTable(table_info.table_path)
     elif table_info.format == "chance":
         return ChanceTable(table_info.table_path)
-    elif table_info.format == "weighted":
+    elif table_info.format == "weighted-list":
         return WeightedListTable(table_info.table_path)
     else:
         raise ValueError(
@@ -106,7 +106,7 @@ class TableInliner:
         parsed_info = table_rolling_info_parser.match(extracted_inlined_table)
 
         inline_table_path = (
-                current_table_folder / parsed_info.group("table_path")
+            current_table_folder / parsed_info.group("table_path")
         ).resolve()
 
         return InlineTableInfo(
@@ -149,9 +149,9 @@ class TableInliner:
 
             for index, result in enumerate(results):
                 while (
-                        replaced_result := self.roll_inline_tables(
-                            result, table_info.table_path.parent
-                        )
+                    replaced_result := self.roll_inline_tables(
+                        result, table_info.table_path.parent
+                    )
                 ) != result:
                     result = replaced_result
 
