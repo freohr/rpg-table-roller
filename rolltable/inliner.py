@@ -76,7 +76,7 @@ class TableInliner:
             r"(?P<clamp>:cl)|"
             r"(?P<formula>:d(?P<inline_formula>[^:]+))|"
             r"(?P<exclusive>:e)|"
-            r"(?P<format>:f(?P<inline_format>list|chance|weighted))|"
+            r"(?P<format>:f(?P<inline_format>list|chance|weighted-list))|"
             r"(?P<joiner>:j(?P<inline_joiner>[^:]+))"
             r")*"
         )

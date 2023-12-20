@@ -20,11 +20,13 @@ options:
 Input Options:
   table_filepath        path to random table config file
   -f {list,chance,hexflower}, --format {list,chance,hexflower}
-                        Format for the table file content. Options are: 
-                        - 'list' [default]: contains each item as a straight simple list with comments 
+                        Format for the table file content. Options are:
+                        - 'list' [default]: contains each item as a straight simple list with comments
                         - 'chance': each item has a chance to appears in the results, usually as a percentage. Treasures tables from old-school D&D use this format.
-                        - 'hexflower': the table is represented in json as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation 
+                        - 'hexflower': the table is represented in json as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation
                         - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected. Does not support custom dice formulae for now.
+                        - 'template': the provided file is not a random table, but should simply be printed to the output with the inline rolls processed. Useful if you want to format rolling on multiple tables at once.
+
                         See the 'examples/' folder in the github repo (github.com/freohr/rpg-table-roller) for example table files of the supported formats.
 
 Roll Options:
@@ -54,7 +56,7 @@ This program allows recursive rolling with the `[[...]]` notation, which can be 
 
 Dice notation, when used inline, should follow the same rules as the `-d` option of the main program, i.e. keep it as simple as `XdY±Z`.
 
-When such a notation is encountered with a filename, the program will look up the linked table using **relative pathing** (e.g. `[[other-table]]` should be in the same directory, `[[../other-table]]` should be in the parent folder of the current table, `[[other-folder/other-table]]` should be in the `other-folder` folder located in the current folder). Those tables can link to other tables in turn, enabling you to create a full fledged procedural generator by simply writing lists in text files. 
+When such a notation is encountered with a filename, the program will look up the linked table using **relative pathing** (e.g. `[[other-table]]` should be in the same directory, `[[../other-table]]` should be in the parent folder of the current table, `[[other-folder/other-table]]` should be in the `other-folder` folder located in the current folder). Those tables can link to other tables in turn, enabling you to create a full fledged procedural generator by simply writing lists in text files.
 
 **Important note:** Internally, `rolltable` caches the inline tables it encounters during an execution to reduce the amount of file opening and closing it does, using the table file name: This means that you should make sure that your tables have different names if they link to each other, to avoid overwriting the cached data with something unrelated.
 
@@ -62,12 +64,12 @@ When such a notation is encountered with a filename, the program will look up th
 
 The inline recursive table roller can be further customized with colon options, which are as follow:
 
-- `:e`: Force the rolled results to be *exclusive* when the inline table is present twice or more in the same initial result. Note that this only applies for multiple inline replacements in a single result and when the inline table is either referenced more than once, or if the addtional option `:c` is used to roll multiple results at once.
+- `:e`: Force the rolled results to be _exclusive_ when the inline table is present twice or more in the same initial result. Note that this only applies for multiple inline replacements in a single result and when the inline table is either referenced more than once, or if the additional option `:c` is used to roll multiple results at once.
 - `:d` followed by a number or a dice-notation string: Change the dice formula used to rolled on the inline table.
 - `:cl`: Clamp the inlined results to the values present on the inline table. Same as the `--clamp` option on the command-line, it only has an effect when combined with a custom dice formula.
 - `:f` followed by the name of one of the format: Specifies the list format of the inlined list. Defaults to `list`, like the program option of the same name
 - `:c` followed by a number or a dice-notation string: Change the number of results rolled from 1 to many, to inline multiple results. Defaults to 1 inlined result, must be greater than or equal to 0 (but it will inline an empty string in this case)
-- `:j` followed by a string: Specifies how to join the many-rolled results in the replacement string when used with `:c`. Defaults to `, `, and has no effect when used with the default `:c` value.
+- `:j` followed by a string: Specifies how to join the many-rolled results in the replacement string when used with `:c`. Defaults to `,`, and has no effect when used with the default `:c` value.
 
 Those options can be combined (and the `:cl` option doesn't even do anything on its own) to further specify the behavior of the roller for this specific inlined result. For example, if you want one of your results to be `Roll twice on this table, rerolling duplicates`, you can have the last result (of your arbitraty 10 results for example) written as `[[this-table:e:dd9]] and [[this-table:e:dd9]]` to enable a 1-in-10 reroll on this table, selecting two exclusive results that are not the reroll.
 
