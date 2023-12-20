@@ -64,11 +64,12 @@ When such a notation is encountered with a filename, the program will look up th
 
 The inline recursive table roller can be further customized with colon options, which are as follow:
 
-- `:e`: Force the rolled results to be _exclusive_ when the inline table is present twice or more in the same initial result. Note that this only applies for inline replacement in a single result and if the inline table is referenced more than once.
+- `:e`: Force the rolled results to be _exclusive_ when the inline table is present twice or more in the same initial result. Note that this only applies for multiple inline replacements in a single result and when the inline table is either referenced more than once, or if the additional option `:c` is used to roll multiple results at once.
 - `:d` followed by a number or a dice-notation string: Change the dice formula used to rolled on the inline table.
 - `:cl`: Clamp the inlined results to the values present on the inline table. Same as the `--clamp` option on the command-line, it only has an effect when combined with a custom dice formula.
-- `:f` followed by the name of one of the format: Specifies the list format of the inlined list
-- `:c` followed by a number or a dice-notation string: Change the number of results rolled from 1 to many, to inline multiple results. Does not do anything right now, I need to implement a `:j` option to join multiple results before inlining them.
+- `:f` followed by the name of one of the format: Specifies the list format of the inlined list. Defaults to `list`, like the program option of the same name
+- `:c` followed by a number or a dice-notation string: Change the number of results rolled from 1 to many, to inline multiple results. Defaults to 1 inlined result, must be greater than or equal to 0 (but it will inline an empty string in this case)
+- `:j` followed by a string: Specifies how to join the many-rolled results in the replacement string when used with `:c`. Defaults to `,`, and has no effect when used with the default `:c` value.
 
 Those options can be combined (and the `:cl` option doesn't even do anything on its own) to further specify the behavior of the roller for this specific inlined result. For example, if you want one of your results to be `Roll twice on this table, rerolling duplicates`, you can have the last result (of your arbitraty 10 results for example) written as `[[this-table:e:dd9]] and [[this-table:e:dd9]]` to enable a 1-in-10 reroll on this table, selecting two exclusive results that are not the reroll.
 
