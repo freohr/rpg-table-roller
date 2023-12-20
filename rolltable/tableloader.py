@@ -69,7 +69,7 @@ def get_table_lines(table_path):
 
     with Path(table_path).open("r") as table_content:
         table_lines = table_content.readlines()
-        return table_lines
+        return [line.strip() for line in table_lines]
 
     return []
 
