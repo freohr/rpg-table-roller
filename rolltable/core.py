@@ -9,6 +9,48 @@ from inliner import TableInliner
 from weightedlisttable import WeightedListTable
 from outtemplate import OutputTemplate
 import __version__
+from enum import Enum
+
+
+class TableFormat(Enum):
+    List = 1
+    Chance = 2
+    Hexflower = 3
+    Weighted_list = 4
+    Template = 5
+
+
+def load_table(format: TableFormat, args):
+    if format == TableFormat.List:
+        return RandomTable(
+            args.table_filepath,
+            args.count,
+            args.exclusive,
+            args.clamp,
+            args.dice_formula,
+        )
+    elif format == TableFormat.Chance:
+        return ChanceTable(
+            args.table_filepath,
+            args.count,
+            args.exclusive,
+            args.clamp,
+            args.dice_formula,
+        )
+    elif format == TableFormat.Weighted_list:
+        return WeightedListTable(
+            args.table_filepath,
+            args.count,
+            args.exclusive,
+            args.clamp,
+            args.dice_formula,
+        )
+    elif format == TableFormat.Hexflower:
+        return Hexflower(args.table_filepath, args.count, args.start)
+    elif format == TableFormat.Template:
+        return OutputTemplate(args.table_filepath)
+
+    raise ValueError("Unknown table format")
 
 
 def main():
@@ -16,34 +58,32 @@ def main():
     table = None
 
     try:
-        if args.format == "list":
-            table = RandomTable(
-                args.table_filepath,
-                args.count,
-                args.exclusive,
-                args.clamp,
-                args.dice_formula,
-            )
+        if args.ext:
+            extension = Path(args.table_filepath).suffix[1:]
+
+            if extension == "table" or extension == "list":
+                table = load_table(TableFormat.List, args)
+            elif extension == "chance":
+                table = load_table(TableFormat.Chance, args)
+            elif extension == "weighted_list":
+                table = load_table(TableFormat.Weighted_list, args)
+            elif extension == "hexflower":
+                table = load_table(TableFormat.Hexflower, args)
+            elif extension == "template":
+                table = load_table(TableFormat.Template, args)
+        elif args.format == "list":
+            table = load_table(TableFormat.List, args)
         elif args.format == "chance":
-            table = ChanceTable(
-                args.table_filepath,
-                args.count,
-                args.exclusive,
-                args.clamp,
-                args.dice_formula,
-            )
+            table = load_table(TableFormat.Chance, args)
         elif args.format == "hexflower":
-            table = Hexflower(args.table_filepath, args.count, args.start)
+            table = load_table(TableFormat.Hexflower, args)
         elif args.format == "weighted-list":
-            table = WeightedListTable(
-                args.table_filepath,
-                args.count,
-                args.exclusive,
-                args.clamp,
-                args.dice_formula,
-            )
+            table = load_table(TableFormat.Weighted_list, args)
         elif args.format == "template":
-            table = OutputTemplate(args.table_filepath)
+            table = load_table(TableFormat.Template, args)
+
+        if table is None:
+            raise ValueError("Unknown table format")
     except Exception as exc:
         print(exc)
         exit(1)
@@ -136,6 +176,13 @@ def get_parameters():
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
         choices=["list", "chance", "hexflower", "weighted-list", "template"],
+    )
+
+    input_group.add_argument(
+        "-x",
+        "--ext",
+        action="store_true",
+        help="Get table format from file extension. See `--format` for the list of accepted formats",
     )
 
     roll_group = parser.add_argument_group("Roll Options")
