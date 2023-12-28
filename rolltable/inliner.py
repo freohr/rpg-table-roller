@@ -16,9 +16,19 @@ class InlineTableInfo:
         formula=None,
         count=None,
         joiner=None,
+        format_from_extension=False,
     ):
         self.table_path = canonical_path
-        self.format = table_format if table_format is not None else "list"
+
+        if format_from_extension:
+            ext = canonical_path.suffix[1:].replace("_", "-")
+            if ext == "table":
+                ext = "list"
+
+            self.format = ext
+        else:
+            self.format = table_format if table_format is not None else "list"
+
         self.exclusive = exclusive
         self.clamp = clamp
         self.formula = formula if formula is not None else ""
@@ -77,7 +87,8 @@ class TableInliner:
             r"(?P<formula>:d(?P<inline_formula>[^:]+))|"
             r"(?P<exclusive>:e)|"
             r"(?P<format>:f(?P<inline_format>list|chance|weighted-list))|"
-            r"(?P<joiner>:j(?P<inline_joiner>[^:]+))"
+            r"(?P<joiner>:j(?P<inline_joiner>[^:]+))|"
+            r"(?P<extension>:x)"
             r")*"
         )
         pass
@@ -127,8 +138,8 @@ class TableInliner:
             inline_table_path,
             parsed_info.group("inline_format") if parsed_info.group(
                 "format") else None,
-            True if parsed_info.group("exclusive") else False,
-            True if parsed_info.group("clamp") else False,
+            parsed_info.group("exclusive") is not None,
+            parsed_info.group("clamp") is not None,
             parsed_info.group("inline_formula")
             if parsed_info.group("formula")
             else None,
@@ -136,6 +147,7 @@ class TableInliner:
                 "count") else None,
             parsed_info.group("inline_joiner") if parsed_info.group(
                 "joiner") else None,
+            parsed_info.group("extension") is not None,
         )
 
     def roll_inline_tables(self, rolled_result: str, current_table_folder: Path):
