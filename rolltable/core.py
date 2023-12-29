@@ -20,8 +20,8 @@ class TableFormat(Enum):
     Template = 5
 
 
-def load_table(format: TableFormat, args):
-    if format == TableFormat.List:
+def load_table(table_format: TableFormat, args):
+    if table_format == TableFormat.List:
         return RandomTable(
             args.table_filepath,
             args.count,
@@ -29,7 +29,7 @@ def load_table(format: TableFormat, args):
             args.clamp,
             args.dice_formula,
         )
-    elif format == TableFormat.Chance:
+    elif table_format == TableFormat.Chance:
         return ChanceTable(
             args.table_filepath,
             args.count,
@@ -37,7 +37,7 @@ def load_table(format: TableFormat, args):
             args.clamp,
             args.dice_formula,
         )
-    elif format == TableFormat.Weighted_list:
+    elif table_format == TableFormat.Weighted_list:
         return WeightedListTable(
             args.table_filepath,
             args.count,
@@ -45,9 +45,9 @@ def load_table(format: TableFormat, args):
             args.clamp,
             args.dice_formula,
         )
-    elif format == TableFormat.Hexflower:
+    elif table_format == TableFormat.Hexflower:
         return Hexflower(args.table_filepath, args.count, args.start)
-    elif format == TableFormat.Template:
+    elif table_format == TableFormat.Template:
         return OutputTemplate(args.table_filepath)
 
     raise ValueError("Unknown table format")
@@ -98,8 +98,7 @@ def main():
                 raw_results, recursive_table_inliner, base_table_folder
             )
 
-            open_writing_device(processed_results,
-                                args.output, args.append, args.join)
+            open_writing_device(processed_results, args.output, args.append, args.join)
         else:
             exit(1)
 
@@ -113,9 +112,7 @@ def process_inline_tables(results, inliner, base_folder):
         ]
 
 
-def open_writing_device(
-    result_array, output=None, append=False, joiner: str = None, file_to_write=None
-):
+def open_writing_device(result_array, output=None, append=False, joiner: str = None):
     write_to = Path(output).open("a" if append else "w") if output else None
 
     print_results(result_array, joiner, write_to)
@@ -160,8 +157,7 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument(
-        "table_filepath", help="path to random table config file")
+    input_group.add_argument("table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",

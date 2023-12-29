@@ -36,10 +36,10 @@ class ChanceTable(tableloader.TableLoader):
         return results
 
 
-def roll_occurence(name, formula, chance):
+def roll_occurrence(name, formula, chance):
     return name if dice.roll(f"{formula}t") <= chance else None
 
 
 def split_line(line):
     split = line.split("\t")
-    return (split[0], int(split[1]))
+    return split[0], int(split[1])

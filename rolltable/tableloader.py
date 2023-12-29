@@ -6,7 +6,12 @@ import dice
 
 class TableLoader:
     def __init__(
-        self, filepath: str, count: str = "1", exclusive=False, clamp=False, dice_formula=None
+        self,
+        filepath: str,
+        count: str = "1",
+        exclusive=False,
+        clamp=False,
+        dice_formula=None,
     ):
         self.roll_config = types.SimpleNamespace()
         self.roll_config.count = count
@@ -33,8 +38,9 @@ class TableLoader:
         roll_min = int(dice.roll_min(self.roll_config.formula))
         if roll_max > self.table_length() or roll_min < 0:
             raise IndexError(
-                f"""The supplied dice formula should not roll higher than the number of entries on the table or lower than 0.
-Minimum formula value is {roll_min}, maximum formula value is {roll_max}, and table count is {len(self.table)}"""
+                f"""The supplied dice formula should not roll higher than the number of entries on the table or lower 
+                than 0. Minimum formula value is {roll_min}, maximum formula value is {roll_max}, and table count is 
+                {len(self.table)}"""
             )
 
     def get_rolled_count(self):
@@ -73,8 +79,6 @@ def get_table_lines(table_path):
     with Path(table_path).open("r") as table_content:
         table_lines = table_content.readlines()
         return [line.strip() for line in table_lines]
-
-    return []
 
 
 def is_line_comment(line):

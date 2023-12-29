@@ -44,7 +44,7 @@ class WeightedListTable(tableloader.TableLoader):
             if len(split_line) == 1:
                 if potential_weight.isdecimal():
                     table_weight.append(int(potential_weight))
-                    table_items.append('')
+                    table_items.append("")
                 else:
                     table_items.append(split_line[0])
                     table_weight.append(1)

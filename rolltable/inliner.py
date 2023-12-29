@@ -95,8 +95,7 @@ class TableInliner:
 
     def load_inlined_table(self, table_info: InlineTableInfo, count=1):
         if table_info.table_path not in self.loaded_tables:
-            self.loaded_tables[table_info.table_path] = create_table(
-                table_info)
+            self.loaded_tables[table_info.table_path] = create_table(table_info)
 
         table = self.loaded_tables[table_info.table_path]
         table.set_flag("exclusive", table_info.exclusive)
@@ -127,8 +126,7 @@ class TableInliner:
     def parse_inline_table_info(
         self, extracted_inlined_table, current_table_folder: Path
     ):
-        parsed_info = self.table_rolling_info_parser.match(
-            extracted_inlined_table)
+        parsed_info = self.table_rolling_info_parser.match(extracted_inlined_table)
 
         inline_table_path = (
             current_table_folder / parsed_info.group("table_path")
@@ -136,17 +134,14 @@ class TableInliner:
 
         return InlineTableInfo(
             inline_table_path,
-            parsed_info.group("inline_format") if parsed_info.group(
-                "format") else None,
+            parsed_info.group("inline_format") if parsed_info.group("format") else None,
             parsed_info.group("exclusive") is not None,
             parsed_info.group("clamp") is not None,
             parsed_info.group("inline_formula")
             if parsed_info.group("formula")
             else None,
-            parsed_info.group("roll_count") if parsed_info.group(
-                "count") else None,
-            parsed_info.group("inline_joiner") if parsed_info.group(
-                "joiner") else None,
+            parsed_info.group("roll_count") if parsed_info.group("count") else None,
+            parsed_info.group("inline_joiner") if parsed_info.group("joiner") else None,
             parsed_info.group("extension") is not None,
         )
 
@@ -166,15 +161,13 @@ class TableInliner:
         parsed_tables = dict()
 
         for index, result in enumerate(inlined_elements):
-            table_info = self.parse_inline_table_info(
-                result, current_table_folder)
+            table_info = self.parse_inline_table_info(result, current_table_folder)
 
             if table_info not in parsed_tables:
                 parsed_tables[table_info] = TableReferenceCounter()
 
             table_ref_count = parsed_tables[table_info]
-            table_ref_count.add_reference(
-                index, table_info.count, table_info.joiner)
+            table_ref_count.add_reference(index, table_info.count, table_info.joiner)
 
         # Step 3: Replace inlined tables reference with rolled results
         for table_info, ref_counter in parsed_tables.items():
@@ -184,10 +177,9 @@ class TableInliner:
 
             # Part 2: Replace inline markers with results
             for index, replacer_info in ref_counter.indices.items():
-                # Get as much results as needed to replace a single marker
+                # Get as many results as needed to replace a single marker
                 result_slicer = slice(0, replacer_info["count"])
-                replacer_string = replacer_info["joiner"].join(
-                    results[result_slicer])
+                replacer_string = replacer_info["joiner"].join(results[result_slicer])
 
                 del results[result_slicer]
 
