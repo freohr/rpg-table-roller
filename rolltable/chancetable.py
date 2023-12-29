@@ -22,14 +22,15 @@ class ChanceTable(tableloader.TableLoader):
 
     def get_results(self):
         dice_formula = self.roll_config.formula or "d100"
+        count = self.get_rolled_count()
 
         results = [
             [
                 result
                 for entry, chance in self.table
-                if (result := roll_occurence(entry, dice_formula, chance))
+                if (result := roll_occurrence(entry, dice_formula, chance))
             ]
-            for i in range(self.roll_config.count)
+            for _ in range(count)
         ]
 
         return results

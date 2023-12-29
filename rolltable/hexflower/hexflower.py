@@ -5,12 +5,14 @@ import hexflower.parser as Parser
 
 
 class Hexflower(tableloader.TableLoader):
-    def __init__(self, filepath: str, count=1, start=None):
+    def __init__(self, filepath: str, count: str = "1", start=None):
         super().__init__(filepath, count)
         self.roll_config.start = start
 
     def get_results(self):
-        if self.roll_config.count < 1:
+        count = self.get_rolled_count()
+
+        if count < 1:
             return []
 
         start_index = (
@@ -22,7 +24,7 @@ class Hexflower(tableloader.TableLoader):
         current_hex = self.table.get_hex(start_index)
         results = [str(current_hex)]
 
-        for i in range(self.roll_config.count - 1):
+        for i in range(count - 1):
             current_hex = self.table.navigate(current_hex)
             results.append(str(current_hex))
 

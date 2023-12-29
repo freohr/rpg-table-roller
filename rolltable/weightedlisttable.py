@@ -10,17 +10,19 @@ class WeightedListTable(tableloader.TableLoader):
         super().__init__(filepath, count, exclusive, clamp, dice_formula)
 
     def get_results(self):
+        count = self.get_rolled_count()
+
         if self.roll_config.exclusive:
             return random.sample(
                 self.table.items,
                 counts=self.table.weights,
-                k=min(self.roll_config.count, sum(self.table.weight)),
+                k=min(count, sum(self.table.weight)),
             )
         else:
             return random.choices(
                 self.table.items,
                 weights=self.table.weights,
-                k=self.roll_config.count,
+                k=count,
             )
 
     def table_length(self):

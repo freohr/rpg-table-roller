@@ -82,7 +82,7 @@ class TableInliner:
         self.table_rolling_info_parser = re.compile(
             r"(?P<table_path>[^:]+)"
             r"("
-            r"(?P<count>:c(?P<roll_count>\d+))|"
+            r"(?P<count>:c(?P<roll_count>[^:]+))|"
             r"(?P<clamp>:cl)|"
             r"(?P<formula>:d(?P<inline_formula>[^:]+))|"
             r"(?P<exclusive>:e)|"
@@ -93,7 +93,7 @@ class TableInliner:
         )
         pass
 
-    def load_inlined_table(self, table_info: InlineTableInfo, count):
+    def load_inlined_table(self, table_info: InlineTableInfo, count=1):
         if table_info.table_path not in self.loaded_tables:
             self.loaded_tables[table_info.table_path] = create_table(
                 table_info)

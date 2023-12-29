@@ -6,7 +6,7 @@ import dice
 
 class TableLoader:
     def __init__(
-        self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
+        self, filepath: str, count: str = "1", exclusive=False, clamp=False, dice_formula=None
     ):
         self.roll_config = types.SimpleNamespace()
         self.roll_config.count = count
@@ -37,6 +37,9 @@ class TableLoader:
 Minimum formula value is {roll_min}, maximum formula value is {roll_max}, and table count is {len(self.table)}"""
             )
 
+    def get_rolled_count(self):
+        return int(dice.roll(self.roll_config.count))
+
     def get_results(self):
         pass
 
@@ -59,7 +62,7 @@ Minimum formula value is {roll_min}, maximum formula value is {roll_max}, and ta
             return
 
         if name == "count":
-            self.roll_config.count = int(value)
+            self.roll_config.count = value
             return
 
 

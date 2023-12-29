@@ -189,11 +189,11 @@ def get_parameters():
     roll_group.add_argument(
         "-c",
         "--count",
-        type=int,
-        default=1,
+        type=str,
+        default="1",
         dest="count",
         help="""How many rolled results do you want from the table?
-                (defaults to 1 result)""",
+                (defaults to 1 result). Can be a number or a dice formula""",
     )
     roll_group.add_argument(
         "-e",

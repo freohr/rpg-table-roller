@@ -11,23 +11,23 @@ class RandomTable(tableloader.TableLoader):
         super().__init__(filepath, count, exclusive, clamp, dice_formula)
 
     def get_results(self):
+        count = self.get_rolled_count()
+
         if self.roll_config.formula:
-            return self.get_formula_result()
+            return self.get_formula_result(count)
 
         if self.roll_config.exclusive:
-            return self.get_exclusive_results()
+            return self.get_exclusive_results(count)
 
-        return self.get_random_results()
+        return self.get_random_results(count)
 
-    def get_exclusive_results(self):
-        return random.sample(self.table, k=min(self.roll_config.count, len(self.table)))
+    def get_exclusive_results(self, count: int):
+        return random.sample(self.table, k=min(count, len(self.table)))
 
-    def get_random_results(self):
-        return random.choices(self.table, k=self.roll_config.count)
+    def get_random_results(self, count: int):
+        return random.choices(self.table, k=count)
 
-    def get_formula_result(self):
-        rolled_indices = None
-
+    def get_formula_result(self, count: int):
         if self.roll_config.clamp:
             rolled_indices = [
                 clamp(
@@ -35,14 +35,14 @@ class RandomTable(tableloader.TableLoader):
                     0,
                     len(self.table) - 1,
                 )
-                for i in range(self.roll_config.count)
+                for _ in range(count)
             ]
             if self.roll_config.exclusive:
                 rolled_indices = set(rolled_indices)
         else:
             rolled_indices = [
                 int(dice.roll(f"{self.roll_config.formula}")) - 1
-                for i in range(self.roll_config.count)
+                for _ in range(count)
             ]
 
             if self.roll_config.exclusive:
