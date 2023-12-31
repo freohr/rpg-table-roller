@@ -1,24 +1,15 @@
-import tableloader
-from pathlib import Path
 import dice
+import table.baseloader as table_loader
 
 
-class ChanceTable(tableloader.TableLoader):
+class ChanceTable(table_loader.BaseTableLoader):
     def __init__(
         self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
     ):
         super().__init__(filepath, count, exclusive, clamp, dice_formula)
 
     def load_table(self, table_path):
-        if not Path(table_path).is_file():
-            raise FileNotFoundError(f"File {table_path} does not exists")
-
-        with Path(table_path).open("r") as table_file:
-            table_content = table_file.read()
-
-            loaded_table = [split_line(line) for line in table_content.splitlines()]
-
-        return loaded_table
+        return table_loader.get_table_lines(table_path)
 
     def get_results(self):
         dice_formula = self.roll_config.formula or "d100"

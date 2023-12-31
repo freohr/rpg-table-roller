@@ -4,7 +4,7 @@ import types
 import dice
 
 
-class TableLoader:
+class BaseTableLoader:
     def __init__(
         self,
         filepath: str,

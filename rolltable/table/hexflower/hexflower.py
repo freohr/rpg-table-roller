@@ -1,10 +1,10 @@
 from pathlib import Path
 import json
-import tableloader
-import hexflower.parser as Parser
+import table.baseloader as table_loader
+import table.hexflower.parser as Parser
 
 
-class Hexflower(tableloader.TableLoader):
+class Hexflower(table_loader.BaseTableLoader):
     def __init__(self, filepath: str, count: str = "1", start=None):
         super().__init__(filepath, count)
         self.roll_config.start = start

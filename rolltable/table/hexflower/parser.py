@@ -1,6 +1,6 @@
-from hexflower.direction import Direction
-from hexflower.navigator import Navigator
-from hexflower.hexagon import Hexagon
+from table.hexflower.direction import Direction
+from table.hexflower.navigator import Navigator
+from table.hexflower.hexagon import Hexagon
 from typing import Dict
 
 

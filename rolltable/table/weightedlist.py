@@ -1,9 +1,9 @@
-import tableloader
 import random
 from types import SimpleNamespace
+import table.baseloader as table_loader
 
 
-class WeightedListTable(tableloader.TableLoader):
+class WeightedListTable(table_loader.BaseTableLoader):
     def __init__(
         self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
     ):
@@ -29,7 +29,7 @@ class WeightedListTable(tableloader.TableLoader):
         return sum(self.table.weights)
 
     def load_table(self, table_path):
-        table_content = tableloader.get_table_lines(table_path)
+        table_content = table_loader.get_table_lines(table_path)
 
         table_items = []
         table_weight = []

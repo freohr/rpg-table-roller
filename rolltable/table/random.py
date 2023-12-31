@@ -1,9 +1,9 @@
 import random
 import dice
-import tableloader
+import table.baseloader as table_loader
 
 
-class RandomTable(tableloader.TableLoader):
+class RandomTable(table_loader.BaseTableLoader):
     def __init__(
         self,
         filepath: str,
@@ -56,11 +56,11 @@ class RandomTable(tableloader.TableLoader):
         return results
 
     def load_table(self, table_path):
-        table_content = tableloader.get_table_lines(table_path)
+        table_content = table_loader.get_table_lines(table_path)
         table = [
             line.strip()
             for line in table_content
-            if not tableloader.is_line_comment(line) and not line.strip() == ""
+            if not table_loader.is_line_comment(line) and not line.strip() == ""
         ]
         return table
 

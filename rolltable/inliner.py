@@ -1,8 +1,8 @@
 import dice
 import re
-from randomtable import RandomTable
-from chancetable import ChanceTable
-from weightedlisttable import WeightedListTable
+from table.random import RandomTable
+from table.chance import ChanceTable
+from table.weightedlist import WeightedListTable
 from pathlib import Path
 
 

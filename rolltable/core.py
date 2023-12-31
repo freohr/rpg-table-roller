@@ -1,56 +1,10 @@
-#! python
 import sys
 import argparse
-from pathlib import Path
-from randomtable import RandomTable
-from chancetable import ChanceTable
-from hexflower.hexflower import Hexflower
-from inliner import TableInliner
-from weightedlisttable import WeightedListTable
-from outtemplate import OutputTemplate
 import __version__
-from enum import Enum
-
-
-class TableFormat(Enum):
-    List = 1
-    Chance = 2
-    Hexflower = 3
-    Weighted_list = 4
-    Template = 5
-
-
-def load_table(table_format: TableFormat, args):
-    if table_format == TableFormat.List:
-        return RandomTable(
-            args.table_filepath,
-            args.count,
-            args.exclusive,
-            args.clamp,
-            args.dice_formula,
-        )
-    elif table_format == TableFormat.Chance:
-        return ChanceTable(
-            args.table_filepath,
-            args.count,
-            args.exclusive,
-            args.clamp,
-            args.dice_formula,
-        )
-    elif table_format == TableFormat.Weighted_list:
-        return WeightedListTable(
-            args.table_filepath,
-            args.count,
-            args.exclusive,
-            args.clamp,
-            args.dice_formula,
-        )
-    elif table_format == TableFormat.Hexflower:
-        return Hexflower(args.table_filepath, args.count, args.start)
-    elif table_format == TableFormat.Template:
-        return OutputTemplate(args.table_filepath)
-
-    raise ValueError("Unknown table format")
+import dice.exceptions
+import loader
+from pathlib import Path
+from inliner import TableInliner
 
 
 def main():
@@ -60,47 +14,28 @@ def main():
     try:
         if args.ext:
             extension = Path(args.table_filepath).suffix[1:]
-
-            if extension == "table" or extension == "list":
-                table = load_table(TableFormat.List, args)
-            elif extension == "chance":
-                table = load_table(TableFormat.Chance, args)
-            elif extension == "weighted_list":
-                table = load_table(TableFormat.Weighted_list, args)
-            elif extension == "hexflower":
-                table = load_table(TableFormat.Hexflower, args)
-            elif extension == "template":
-                table = load_table(TableFormat.Template, args)
-        elif args.format == "list":
-            table = load_table(TableFormat.List, args)
-        elif args.format == "chance":
-            table = load_table(TableFormat.Chance, args)
-        elif args.format == "hexflower":
-            table = load_table(TableFormat.Hexflower, args)
-        elif args.format == "weighted-list":
-            table = load_table(TableFormat.Weighted_list, args)
-        elif args.format == "template":
-            table = load_table(TableFormat.Template, args)
-
-        if table is None:
-            raise ValueError("Unknown table format")
-    except Exception as exc:
-        print(exc)
-        exit(1)
-    else:
-        if table:
-            base_table_folder = Path(args.table_filepath).parent.resolve()
-
-            recursive_table_inliner = TableInliner()
-
-            raw_results = table.get_results()
-            processed_results = process_inline_tables(
-                raw_results, recursive_table_inliner, base_table_folder
-            )
-
-            open_writing_device(processed_results, args.output, args.append, args.join)
+            table = loader.load_table_from_extenstion(extension, args)
         else:
-            exit(1)
+            table = loader.load_table_from_format(args.format, args)
+
+        base_table_folder = Path(args.table_filepath).parent.resolve()
+
+        recursive_table_inliner = TableInliner()
+
+        raw_results = table.get_results()
+        processed_results = process_inline_tables(
+            raw_results, recursive_table_inliner, base_table_folder
+        )
+
+        open_writing_device(processed_results, args.output,
+                            args.append, args.join)
+
+    except dice.exceptions.DiceException as exc:
+        print(f"Invalid dice formula: {str(exc)}")
+        exit(2)
+    except Exception as exc:
+        print(f"Error when processing arguments: {str(exc)}")
+        exit(1)
 
 
 def process_inline_tables(results, inliner, base_folder):
@@ -157,7 +92,8 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument("table_filepath", help="path to random table config file")
+    input_group.add_argument(
+        "table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",

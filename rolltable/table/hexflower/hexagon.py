@@ -1,4 +1,4 @@
-from hexflower.direction import Direction
+from table.hexflower.direction import Direction
 
 
 class Hexagon:
