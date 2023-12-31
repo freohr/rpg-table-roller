@@ -68,7 +68,7 @@ class TableLoader:
             return
 
         if name == "count":
-            self.roll_config.count = value
+            self.roll_config.count = f"{value}"
             return
 
 
