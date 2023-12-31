@@ -1,33 +1,35 @@
-import tableloader
 import random
 from types import SimpleNamespace
+import table.baseloader as table_loader
 
 
-class WeightedListTable(tableloader.TableLoader):
+class WeightedListTable(table_loader.BaseTableLoader):
     def __init__(
         self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
     ):
         super().__init__(filepath, count, exclusive, clamp, dice_formula)
 
     def get_results(self):
+        count = self.get_rolled_count()
+
         if self.roll_config.exclusive:
             return random.sample(
                 self.table.items,
                 counts=self.table.weights,
-                k=min(self.roll_config.count, sum(self.table.weight)),
+                k=min(count, sum(self.table.weight)),
             )
         else:
             return random.choices(
                 self.table.items,
                 weights=self.table.weights,
-                k=self.roll_config.count,
+                k=count,
             )
 
     def table_length(self):
         return sum(self.table.weights)
 
     def load_table(self, table_path):
-        table_content = tableloader.get_table_lines(table_path)
+        table_content = table_loader.get_table_lines(table_path)
 
         table_items = []
         table_weight = []
@@ -42,7 +44,7 @@ class WeightedListTable(tableloader.TableLoader):
             if len(split_line) == 1:
                 if potential_weight.isdecimal():
                     table_weight.append(int(potential_weight))
-                    table_items.append('')
+                    table_items.append("")
                 else:
                     table_items.append(split_line[0])
                     table_weight.append(1)

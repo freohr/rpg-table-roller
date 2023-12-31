@@ -1,8 +1,8 @@
 import dice
 import re
-from randomtable import RandomTable
-from chancetable import ChanceTable
-from weightedlisttable import WeightedListTable
+from table.random import RandomTable
+from table.chance import ChanceTable
+from table.weightedlist import WeightedListTable
 from pathlib import Path
 
 
@@ -32,7 +32,7 @@ class InlineTableInfo:
         self.exclusive = exclusive
         self.clamp = clamp
         self.formula = formula if formula is not None else ""
-        self.count = int(count) if count is not None else 1
+        self.count = int(dice.roll(count)) if count is not None else 1
         self.joiner = joiner if joiner is not None else ", "
 
     def __eq__(self, other):
@@ -53,7 +53,7 @@ class TableReferenceCounter:
         self.roll_count = 0
         self.indices = dict()
 
-    def add_reference(self, index, count, joiner: str = None):
+    def add_reference(self, index, count: int, joiner: str = None):
         self.roll_count = self.roll_count + count
         self.indices[index] = {
             "count": count,
@@ -82,7 +82,7 @@ class TableInliner:
         self.table_rolling_info_parser = re.compile(
             r"(?P<table_path>[^:]+)"
             r"("
-            r"(?P<count>:c(?P<roll_count>\d+))|"
+            r"(?P<count>:c(?P<roll_count>[^:]+))|"
             r"(?P<clamp>:cl)|"
             r"(?P<formula>:d(?P<inline_formula>[^:]+))|"
             r"(?P<exclusive>:e)|"
@@ -93,7 +93,7 @@ class TableInliner:
         )
         pass
 
-    def load_inlined_table(self, table_info: InlineTableInfo, count):
+    def load_inlined_table(self, table_info: InlineTableInfo, count=1):
         if table_info.table_path not in self.loaded_tables:
             self.loaded_tables[table_info.table_path] = create_table(
                 table_info)
@@ -184,7 +184,7 @@ class TableInliner:
 
             # Part 2: Replace inline markers with results
             for index, replacer_info in ref_counter.indices.items():
-                # Get as much results as needed to replace a single marker
+                # Get as many results as needed to replace a single marker
                 result_slicer = slice(0, replacer_info["count"])
                 replacer_string = replacer_info["joiner"].join(
                     results[result_slicer])
