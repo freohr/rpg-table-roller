@@ -7,7 +7,7 @@ import dice
 class BaseTableLoader:
     def __init__(
         self,
-        filepath: str,
+        table_data,
         count: str = "1",
         exclusive=False,
         clamp=False,
@@ -17,7 +17,12 @@ class BaseTableLoader:
         self.roll_config.count = count
         self.roll_config.exclusive = exclusive
 
-        self.table = self.load_table(filepath or None)
+        if type(table_data) is str:
+            self.table = self.load_table(table_data)
+        elif type(table_data) is list:
+            self.table = table_data
+        else:
+            raise TypeError("Table data is invalid when instantiating")
 
         if not dice_formula:
             self.roll_config.formula = None
@@ -47,10 +52,10 @@ class BaseTableLoader:
         return int(dice.roll(self.roll_config.count))
 
     def get_results(self):
-        pass
+        return []
 
     def load_table(self, table_path):
-        pass
+        return []
 
     def set_flag(self, name, value):
         if name == "exclusive":
@@ -72,7 +77,7 @@ class BaseTableLoader:
             return
 
 
-def get_table_lines(table_path):
+def get_table_lines(table_path: str):
     if not Path(table_path).is_file():
         raise FileNotFoundError(f"Table file '{table_path}' not found.")
 

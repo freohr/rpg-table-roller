@@ -6,13 +6,13 @@ import table.baseloader as table_loader
 class RandomTable(table_loader.BaseTableLoader):
     def __init__(
         self,
-        filepath: str,
+        table_data,
         count=1,
         exclusive=False,
         is_result_clamped=False,
         dice_formula=None,
     ):
-        super().__init__(filepath, count, exclusive, is_result_clamped, dice_formula)
+        super().__init__(table_data, count, exclusive, is_result_clamped, dice_formula)
 
     def get_results(self):
         count = self.get_rolled_count()

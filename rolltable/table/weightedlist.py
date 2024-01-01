@@ -5,9 +5,9 @@ import table.baseloader as table_loader
 
 class WeightedListTable(table_loader.BaseTableLoader):
     def __init__(
-        self, filepath: str, count=1, exclusive=False, clamp=False, dice_formula=None
+        self, table_data, count=1, exclusive=False, clamp=False, dice_formula=None
     ):
-        super().__init__(filepath, count, exclusive, clamp, dice_formula)
+        super().__init__(table_data, count, exclusive, clamp, dice_formula)
 
     def get_results(self):
         count = self.get_rolled_count()
@@ -32,8 +32,8 @@ class WeightedListTable(table_loader.BaseTableLoader):
         table_content = table_loader.get_table_lines(table_path)
 
         table_items = []
-        table_weight = []
-        for index, line in enumerate(table_content):
+        table_weights = []
+        for line in table_content:
             split_line = line.strip().split("\t")
 
             if len(split_line) == 0 or not split_line[0]:
@@ -43,16 +43,16 @@ class WeightedListTable(table_loader.BaseTableLoader):
 
             if len(split_line) == 1:
                 if potential_weight.isdecimal():
-                    table_weight.append(int(potential_weight))
+                    table_weights.append(int(potential_weight))
                     table_items.append("")
                 else:
                     table_items.append(split_line[0])
-                    table_weight.append(1)
+                    table_weights.append(1)
             elif split_line[0].isdecimal():
-                table_weight.append(int(split_line[0]))
+                table_weights.append(int(split_line[0]))
                 table_items.append(" ".join(split_line[1:]))
 
         table = SimpleNamespace()
-        table.weights = table_weight
+        table.weights = table_weights
         table.items = table_items
         return table
