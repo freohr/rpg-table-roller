@@ -1,4 +1,5 @@
 from enum import Enum
+from table.numberedlist import NumberedListTable
 from table.chance import ChanceTable
 from table.random import RandomTable
 from table.template import OutputTemplate
@@ -12,6 +13,7 @@ class TableFormat(Enum):
     Hexflower = 3
     Weighted_list = 4
     Template = 5
+    NumberedList = 6
 
 
 def load_table(table_format: TableFormat, args):
@@ -43,6 +45,14 @@ def load_table(table_format: TableFormat, args):
         return Hexflower(args.table_filepath, args.count, args.start)
     elif table_format == TableFormat.Template:
         return OutputTemplate(args.table_filepath)
+    elif table_format == TableFormat.NumberedList:
+        return NumberedListTable(
+            args.table_filepath,
+            args.count,
+            args.exclusive,
+            args.clamp,
+            args.dice_formula,
+        )
 
     raise ValueError(f"Unknown table format {table_format}")
 
@@ -58,6 +68,8 @@ def load_table_from_extenstion(extension, args):
         return load_table(TableFormat.Hexflower, args)
     elif extension == "template":
         return load_table(TableFormat.Template, args)
+    elif extension == "num_list":
+        return load_table(TableFormat.NumberedList, args)
 
     raise ValueError(f"Unknown table file extension {extension}")
 
@@ -73,5 +85,7 @@ def load_table_from_format(format, args):
         return load_table(TableFormat.Weighted_list, args)
     elif args.format == "template":
         return load_table(TableFormat.Template, args)
+    elif args.format == "numbered-list":
+        return load_table(TableFormat.NumberedList, args)
 
     raise ValueError(f"Unknown table format option {format}")

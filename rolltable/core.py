@@ -27,8 +27,7 @@ def main():
             raw_results, recursive_table_inliner, base_table_folder
         )
 
-        open_writing_device(processed_results, args.output,
-                            args.append, args.join)
+        open_writing_device(processed_results, args.output, args.append, args.join)
 
     except dice.exceptions.DiceException as exc:
         print(f"Invalid dice formula: {str(exc)}")
@@ -92,8 +91,7 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument(
-        "table_filepath", help="path to random table config file")
+    input_group.add_argument("table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",
@@ -104,10 +102,18 @@ def get_parameters():
         - 'hexflower': the table is represented as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation\n
         - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected. Does not support custom dice formulae for now\n
         - 'template': the file is not a random table, but should simply be printed to the output with the inline rolls processed. Useful if you want to format rolling on multiple tables at once.
+        - 'numbered-list': in a TSV list, each item is preceded by the values to roll to select this item, usually indicated by two numbers separated by a dash (e.g. '3-6	Potion of Healing')
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
-        choices=["list", "chance", "hexflower", "weighted-list", "template"],
+        choices=[
+            "list",
+            "chance",
+            "hexflower",
+            "weighted-list",
+            "template",
+            "numbered-list",
+        ],
     )
 
     input_group.add_argument(
