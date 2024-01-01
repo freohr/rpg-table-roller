@@ -4,7 +4,7 @@ import __version__
 import dice.exceptions
 import loader
 from pathlib import Path
-from inliner import TableInliner
+from inliner.inliner import TableInliner
 
 
 def main():
