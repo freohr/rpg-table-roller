@@ -21,8 +21,10 @@ class BaseTableLoader:
             self.table = self.load_table(table_data)
         elif type(table_data) is list:
             self.table = table_data
+        elif Path(table_data).is_file():
+            self.table = self.load_table(table_data)
         else:
-            raise TypeError("Table data is invalid when instantiating")
+            raise TypeError(f"Table data is invalid when instantiating {table_data}")
 
         if not dice_formula:
             self.roll_config.formula = None
