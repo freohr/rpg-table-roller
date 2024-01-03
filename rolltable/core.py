@@ -55,12 +55,12 @@ def open_writing_device(result_array, output=None, append=False, joiner: str = N
         write_to.close()
 
 
-def print_results(result_array, joiner: str = None, write_output=None):
+def print_results(result_array, joiner: str, write_output=None):
     if not result_array:
         print("", file=write_output)
         return
 
-    if isinstance(result_array[0], list):
+    if type(result_array[0]) is list:
         for result in result_array:
             print_results(result, joiner, write_output)
         return

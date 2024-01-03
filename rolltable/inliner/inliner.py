@@ -1,8 +1,10 @@
 import dice
 import re
+from table.numberedlist import NumberedListTable
 from table.random import RandomTable
 from table.chance import ChanceTable
 from table.weightedlist import WeightedListTable
+from table.template import OutputTemplate
 from pathlib import Path
 
 
@@ -24,6 +26,9 @@ class InlineTableInfo:
             ext = canonical_path.suffix[1:].replace("_", "-")
             if ext == "table":
                 ext = "list"
+
+            if ext == "num-list":
+                ext = "numbered-list"
 
             self.format = ext
         else:
@@ -68,6 +73,10 @@ def create_table(table_info):
         return ChanceTable(table_info.table_path)
     elif table_info.format == "weighted-list":
         return WeightedListTable(table_info.table_path)
+    elif table_info.format == "template":
+        return OutputTemplate(table_info.table_path)
+    elif table_info.format == "numbered-list":
+        return NumberedListTable(table_info.table_path)
     else:
         raise ValueError(
             f"Unknown table format {table_info.format}"
