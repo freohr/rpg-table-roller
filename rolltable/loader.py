@@ -44,7 +44,7 @@ def load_table(table_format: TableFormat, args):
     elif table_format == TableFormat.Hexflower:
         return Hexflower(args.table_filepath, args.count, args.start)
     elif table_format == TableFormat.Template:
-        return OutputTemplate(args.table_filepath)
+        return OutputTemplate(args.table_filepath, args.count)
     elif table_format == TableFormat.NumberedList:
         return NumberedListTable(
             args.table_filepath,

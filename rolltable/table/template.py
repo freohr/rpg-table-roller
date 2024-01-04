@@ -1,12 +1,15 @@
 import table.baseloader as table_loader
+import dice
 
 
 class OutputTemplate(table_loader.BaseTableLoader):
-    def __init__(self, table_data):
-        super().__init__(table_data)
+    def __init__(self, table_data, count="1"):
+        super().__init__(table_data, count)
 
     def load_table(self, table_path):
         return table_loader.get_table_lines(table_path)
 
     def get_results(self):
-        return self.table
+        print_count = int(dice.roll(self.roll_config.count))
+
+        return [line for line in self.table for _ in range(print_count)]

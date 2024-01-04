@@ -8,10 +8,8 @@ from inliner.inliner import TableInliner
 
 
 def main():
-    args = get_parameters()
-    table = None
-
     try:
+        args = get_parameters()
         if args.ext:
             extension = Path(args.table_filepath).suffix[1:]
             table = loader.load_table_from_extenstion(extension, args)

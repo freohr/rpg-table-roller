@@ -50,7 +50,9 @@ class InlineTableInfo:
         )
 
     def __hash__(self):
-        return hash((self.table_path, self.formula, self.exclusive, self.clamp))
+        return hash(
+            (self.table_path, self.format, self.formula, self.exclusive, self.clamp)
+        )
 
 
 class TableReferenceCounter:
@@ -74,7 +76,7 @@ def create_table(table_info):
     elif table_info.format == "weighted-list":
         return WeightedListTable(table_info.table_path)
     elif table_info.format == "template":
-        return OutputTemplate(table_info.table_path)
+        return OutputTemplate(table_info.table_path, table_info.count)
     elif table_info.format == "numbered-list":
         return NumberedListTable(table_info.table_path)
     else:
