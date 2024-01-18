@@ -29,10 +29,10 @@ def main():
 
     except dice.exceptions.DiceException as exc:
         print(f"Invalid dice formula: {str(exc)}")
-        exit(2)
+        sys.exit(2)
     except Exception as exc:
         print(f"Error when processing arguments: {str(exc)}")
-        exit(1)
+        sys.exit(1)
 
 
 def process_inline_tables(results, inliner, base_folder):
@@ -44,7 +44,7 @@ def process_inline_tables(results, inliner, base_folder):
         ]
 
 
-def open_writing_device(result_array, output=None, append=False, joiner: str = None):
+def open_writing_device(result_array, output=None, append=False, joiner: str = ""):
     write_to = Path(output).open("a" if append else "w") if output else None
 
     print_results(result_array, joiner, write_to)
