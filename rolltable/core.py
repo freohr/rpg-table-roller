@@ -4,14 +4,12 @@ import __version__
 import dice.exceptions
 import loader
 from pathlib import Path
-from inliner import TableInliner
+from inliner.inliner import TableInliner
 
 
 def main():
-    args = get_parameters()
-    table = None
-
     try:
+        args = get_parameters()
         if args.ext:
             extension = Path(args.table_filepath).suffix[1:]
             table = loader.load_table_from_extenstion(extension, args)
@@ -27,15 +25,14 @@ def main():
             raw_results, recursive_table_inliner, base_table_folder
         )
 
-        open_writing_device(processed_results, args.output,
-                            args.append, args.join)
+        open_writing_device(processed_results, args.output, args.append, args.join)
 
     except dice.exceptions.DiceException as exc:
         print(f"Invalid dice formula: {str(exc)}")
-        exit(2)
+        sys.exit(2)
     except Exception as exc:
         print(f"Error when processing arguments: {str(exc)}")
-        exit(1)
+        sys.exit(1)
 
 
 def process_inline_tables(results, inliner, base_folder):
@@ -47,7 +44,7 @@ def process_inline_tables(results, inliner, base_folder):
         ]
 
 
-def open_writing_device(result_array, output=None, append=False, joiner: str = None):
+def open_writing_device(result_array, output=None, append=False, joiner: str = ""):
     write_to = Path(output).open("a" if append else "w") if output else None
 
     print_results(result_array, joiner, write_to)
@@ -56,12 +53,12 @@ def open_writing_device(result_array, output=None, append=False, joiner: str = N
         write_to.close()
 
 
-def print_results(result_array, joiner: str = None, write_output=None):
+def print_results(result_array, joiner: str, write_output=None):
     if not result_array:
         print("", file=write_output)
         return
 
-    if isinstance(result_array[0], list):
+    if type(result_array[0]) is list:
         for result in result_array:
             print_results(result, joiner, write_output)
         return
@@ -92,8 +89,7 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument(
-        "table_filepath", help="path to random table config file")
+    input_group.add_argument("table_filepath", help="path to random table config file")
     input_group.add_argument(
         "-f",
         "--format",
@@ -104,10 +100,18 @@ def get_parameters():
         - 'hexflower': the table is represented as a hexflower, and result navigation is done step by step. See https://goblinshenchman.wordpress.com/hex-power-flower/ for a detailled explanation\n
         - 'weighted-list': in a TSV list, each item is preceded by a weight indicating the chance to be selected. Does not support custom dice formulae for now\n
         - 'template': the file is not a random table, but should simply be printed to the output with the inline rolls processed. Useful if you want to format rolling on multiple tables at once.
+        - 'numbered-list': in a TSV list, each item is preceded by the values to roll to select this item, usually indicated by two numbers separated by a dash (e.g. '3-6	Potion of Healing')
         \n\n
         See the github repo (freohr/rpg-table-roller) for example table files of the supported formats.""",
         default="list",
-        choices=["list", "chance", "hexflower", "weighted-list", "template"],
+        choices=[
+            "list",
+            "chance",
+            "hexflower",
+            "weighted-list",
+            "template",
+            "numbered-list",
+        ],
     )
 
     input_group.add_argument(
