@@ -138,11 +138,13 @@ class TableInliner:
             try:
                 base_roll = formula_options.group("element")
 
-                count = (
-                    int(formula_options.group("roll_count"))
+                count_formula = (
+                    formula_options.group("roll_count")
                     if formula_options.group("count")
-                    else 1
+                    else "1"
                 )
+                count = int(dice.roll(count_formula))
+
                 joiner = (
                     formula_options.group("inline_joiner")
                     if formula_options.group("joiner")
