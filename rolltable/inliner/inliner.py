@@ -87,22 +87,23 @@ def create_table(table_info):
 
 
 class TableInliner:
+    inline_element_option_parser = re.compile(
+        r"(?P<element>[^:]+)"
+        r"("
+        r"(?P<count>:c(?P<roll_count>[^:]+))|"
+        r"(?P<clamp>:cl)|"
+        r"(?P<formula>:d(?P<inline_formula>[^:]+))|"
+        r"(?P<exclusive>:e)|"
+        r"(?P<format>:f(?P<inline_format>list|chance|weighted-list))|"
+        r"(?P<joiner>:j(?P<inline_joiner>[^:]+))|"
+        r"(?P<extension>:x)"
+        r")*"
+    )
+
+    inline_element_re = re.compile(r"\[\[(?P<element>[^\[\]]+)]]")
+
     def __init__(self):
         self.loaded_tables = dict()
-        self.inline_element_re = re.compile(r"\[\[(?P<element>[^\[\]]+)]]")
-        self.table_rolling_info_parser = re.compile(
-            r"(?P<table_path>[^:]+)"
-            r"("
-            r"(?P<count>:c(?P<roll_count>[^:]+))|"
-            r"(?P<clamp>:cl)|"
-            r"(?P<formula>:d(?P<inline_formula>[^:]+))|"
-            r"(?P<exclusive>:e)|"
-            r"(?P<format>:f(?P<inline_format>list|chance|weighted-list))|"
-            r"(?P<joiner>:j(?P<inline_joiner>[^:]+))|"
-            r"(?P<extension>:x)"
-            r")*"
-        )
-        pass
 
     def load_inlined_table(self, table_info: InlineTableInfo, count=1):
         if table_info.table_path not in self.loaded_tables:
@@ -123,21 +124,47 @@ class TableInliner:
         table.set_flag("formula", "")
         table.set_flag("count", 1)
 
-    def insert_inline_dice_roll(self, string):
+    @staticmethod
+    def insert_inline_dice_roll(string):
         def roll_inline_dice(match):
-            formula = match.group("element")
+            element = match.group("element")
+            if element is None:
+                return match.group(0)
+
+            formula_options = TableInliner.inline_element_option_parser.match(element)
+            if formula_options is None:
+                return match.group(0)
+
             try:
-                return f"{int(dice.roll(formula))}"
+                base_roll = formula_options.group("element")
+
+                count = (
+                    int(formula_options.group("roll_count"))
+                    if formula_options.group("count")
+                    else 1
+                )
+                joiner = (
+                    formula_options.group("inline_joiner")
+                    if formula_options.group("joiner")
+                    else ", "
+                )
+
+                rolls = [f"{int(dice.roll(base_roll))}" for _ in range(count)]
+
+                return joiner.join(rolls)
             except dice.DiceBaseException:
                 return match.group(0)
 
-        new_string = self.inline_element_re.sub(roll_inline_dice, string)
+        new_string = TableInliner.inline_element_re.sub(roll_inline_dice, string)
         return new_string
 
+    @staticmethod
     def parse_inline_table_info(
-        self, extracted_inlined_table, current_table_folder: Path
+            extracted_inlined_table, current_table_folder: Path
     ):
-        parsed_info = self.table_rolling_info_parser.match(extracted_inlined_table)
+        parsed_info = TableInliner.inline_element_option_parser.match(
+            extracted_inlined_table
+        )
 
         if parsed_info is None:
             raise ValueError(
@@ -145,7 +172,7 @@ class TableInliner:
             )
 
         inline_table_path = (
-            current_table_folder / parsed_info.group("table_path")
+            current_table_folder / parsed_info.group("element")
         ).resolve()
 
         return InlineTableInfo(
@@ -162,14 +189,14 @@ class TableInliner:
         )
 
     def roll_inline_tables(self, rolled_result: str, current_table_folder: Path):
-        inlined_elements = self.inline_element_re.findall(rolled_result)
+        inlined_elements = TableInliner.inline_element_re.findall(rolled_result)
 
         # Step 1: replace inline dice rolls
         if len(inlined_elements) == 0:
             return rolled_result
 
         rolled_result = self.insert_inline_dice_roll(rolled_result)
-        inlined_elements = self.inline_element_re.findall(rolled_result)
+        inlined_elements = TableInliner.inline_element_re.findall(rolled_result)
         if len(inlined_elements) == 0:
             return rolled_result
 
