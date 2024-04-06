@@ -79,13 +79,13 @@ class BaseTableLoader:
             return
 
 
-def get_table_lines(table_path: str):
+def get_table_lines(table_path: str, strip_lines: bool = True):
     if not Path(table_path).is_file():
         raise FileNotFoundError(f"Table file '{table_path}' not found.")
 
     with Path(table_path).open("r") as table_content:
         table_lines = table_content.readlines()
-        return [line.strip() for line in table_lines]
+        return [line.strip() if strip_lines else line for line in table_lines]
 
 
 def is_line_comment(line):
