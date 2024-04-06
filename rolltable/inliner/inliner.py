@@ -155,7 +155,12 @@ class TableInliner:
                     else ", "
                 )
 
+                sort = (formula_options.group("sort") is not None)
+
                 rolls = [f"{int(dice.roll(base_roll))}" for _ in range(count)]
+
+                if sort:
+                    rolls = natsorted(rolls)
 
                 return joiner.join(rolls)
             except dice.DiceBaseException:
