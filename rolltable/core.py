@@ -5,7 +5,7 @@ import dice.exceptions
 import loader
 from pathlib import Path
 from inliner.inliner import TableInliner
-
+from natsort.natsort import natsorted
 
 def main():
     try:
@@ -26,7 +26,7 @@ def main():
         )
 
         if args.sort and isinstance(processed_results, list):
-            processed_results.sort()
+            processed_results = natsorted(processed_results)
 
         open_writing_device(processed_results, args.output, args.append, args.join)
 

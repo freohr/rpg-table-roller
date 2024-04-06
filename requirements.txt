@@ -2,3 +2,4 @@ dice>=4.0.0
 pytest
 pyinstaller
 debugpy
+natsort

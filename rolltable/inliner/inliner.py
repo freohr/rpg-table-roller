@@ -6,6 +6,7 @@ from table.chance import ChanceTable
 from table.weightedlist import WeightedListTable
 from table.template import OutputTemplate
 from pathlib import Path
+from natsort import natsorted
 
 
 class InlineTableInfo:
@@ -19,6 +20,7 @@ class InlineTableInfo:
         count=None,
         joiner=None,
         format_from_extension=False,
+        sort=False,
     ):
         self.table_path = canonical_path
 
@@ -39,6 +41,7 @@ class InlineTableInfo:
         self.formula = formula if formula is not None else ""
         self.count = int(dice.roll(count)) if count is not None else 1
         self.joiner = joiner if joiner is not None else ", "
+        self.sort = sort
 
     def __eq__(self, other):
         return (
@@ -96,7 +99,8 @@ class TableInliner:
         r"(?P<exclusive>:e)|"
         r"(?P<format>:f(?P<inline_format>list|chance|weighted-list))|"
         r"(?P<joiner>:j(?P<inline_joiner>[^:]+))|"
-        r"(?P<extension>:x)"
+        r"(?P<extension>:x)|"
+        r"(?P<sort>:s)"
         r")*"
     )
 
@@ -188,6 +192,7 @@ class TableInliner:
             parsed_info.group("roll_count") if parsed_info.group("count") else None,
             parsed_info.group("inline_joiner") if parsed_info.group("joiner") else None,
             parsed_info.group("extension") is not None,
+            parsed_info.group("sort") is not None
         )
 
     def roll_inline_tables(self, rolled_result: str, current_table_folder: Path):
@@ -219,6 +224,9 @@ class TableInliner:
             # Part 1: load the referenced table in cache and roll the needed results
             table = self.load_inlined_table(table_info, ref_counter.roll_count)
             results = table.get_results()
+
+            if table_info.sort:
+                results = natsorted(results)
 
             # Part 2: Replace inline markers with results
             for index, replacer_info in ref_counter.indices.items():
