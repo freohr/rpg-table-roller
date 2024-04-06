@@ -1,3 +1,4 @@
+from pathlib import Path
 import table.baseloader as table_loader
 import dice
 
@@ -7,7 +8,8 @@ class OutputTemplate(table_loader.BaseTableLoader):
         super().__init__(table_data, count)
 
     def load_table(self, table_path):
-        return table_loader.get_table_lines(table_path)
+        with Path(table_path).open("r") as table:
+            return [table.read()]
 
     def get_results(self):
         print_count = int(dice.roll(self.roll_config.count))

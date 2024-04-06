@@ -5,7 +5,7 @@ import dice.exceptions
 import loader
 from pathlib import Path
 from inliner.inliner import TableInliner
-
+from natsort.natsort import natsorted
 
 def main():
     try:
@@ -24,6 +24,9 @@ def main():
         processed_results = process_inline_tables(
             raw_results, recursive_table_inliner, base_table_folder
         )
+
+        if args.sort and isinstance(processed_results, list):
+            processed_results = natsorted(processed_results)
 
         open_writing_device(processed_results, args.output, args.append, args.join)
 
@@ -151,7 +154,6 @@ def get_parameters():
 
     hexflower_group = parser.add_argument_group("Hex-flower Options")
     hexflower_group.add_argument(
-        "-s",
         "--start",
         type=int,
         help="Change the hex number that navigation starts from",
@@ -176,6 +178,12 @@ def get_parameters():
         "--join",
         type=str,
         help="Join the result as a single line string in the output with the provided string. Useful when rolling multiple times on the same chance table, as the results will be aggregated for each set of rolls on the provided table.",
+    )
+    output_group.add_argument(
+        "-s",
+        "--sort",
+        action="store_true",
+        help="Sort the results before creating output. No effect when only rolling for 1 result.",
     )
 
     args = parser.parse_args()
