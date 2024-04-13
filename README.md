@@ -18,8 +18,8 @@ options:
   -v, --version         show program's version number and exit
 
 Input Options:
-  table_filepath        path to random table config file
-  -f {list,chance,hexflower}, --format {list,chance,hexflower}
+  table_filepath        path to random table config file. Can be set to '-' to read the random table content from STDIN.
+  -f {list,chance,hexflower,weighted-list,template}, --format {list,chance,hexflower,weighted-list,template}
                         Format for the table file content. Options are:
                         - 'list' [default]: contains each item as a straight simple list with comments
                         - 'chance': each item has a chance to appears in the results, usually as a percentage. Treasures tables from old-school D&D use this format.
@@ -39,13 +39,14 @@ Roll Options:
   --clamp               Force roll result between first and last element. No effect if not using a custom formula.
 
 Hex-flower Options:
-  -s START, --start START
+  --start START
                         Change the hex number that navigation starts from
 
 Output Options:
   -o OUTPUT, --output OUTPUT
                         Text file to output the rolled results. Note: Contents will be overwritten.
   -a, --append          Append the rolled results to the output file. No effect when printing to STDOUT
+  -s, --sort            Sort the results lexicographically (for strings) and based on expected order (for numbers). No effect when only rolling a single result. See the python package `natsort` for details.
   -j JOIN, --join JOIN  Join the result as a single line string in the output with the provided string. Useful when rolling multiple times on the same chance table, as the results will be aggregated for each set of rolls on the provided table.
 ```
 
@@ -69,11 +70,12 @@ The inline recursive table roller can be further customized with colon options, 
 - `:d` followed by a number or a dice-notation string: Change the dice formula used to rolled on the inline table.
 - `:cl`: Clamp the inlined results to the values present on the inline table. Same as the `--clamp` option on the command-line, it only has an effect when combined with a custom dice formula.
 - `:f` followed by the name of one of the format: Specifies the list format of the inlined list. Defaults to `list`, like the program option of the same name
-- `:c` followed by a number or a dice-notation string: Change the number of results rolled from 1 to many, to inline multiple results. Defaults to 1 inlined result, must be greater than or equal to 0 (but it will inline an empty string in this case)
-- `:j` followed by a string: Specifies how to join the many-rolled results in the replacement string when used with `:c`. Defaults to `,`, and has no effect when used with the default `:c` value.
+- `:c` followed by a number or a dice-notation string: Change the number of results rolled from 1 to many, to inline multiple results. Defaults to 1 inlined result, must be greater than or equal to 0 (but it will inline an empty string in this case). Can also be used with inlined rolls to roll multiple times and insert the results.
+- `:j` followed by a string: Specifies how to join the many-rolled results in the replacement string when used with `:c`. Defaults to `, `, and has no effect when used with the default `:c` value.
 - `:x`: Like the option `--ext`, will attempt to determine the table format from its file extension
+- `:s`: Like the option `--sort`, will sort the results before inserting them into the output string(s). Has no effect when rolling a single result.
 
-Those options can be combined (and the `:cl` option doesn't even do anything on its own) to further specify the behavior of the inline roller for this specific inlined result. For example, if you want one of your results to be `Roll twice on this table, rerolling duplicates`, you can have the last result (of your arbitrary 10 results for example) written as `[[this-table:e:dd9]] and [[this-table:e:dd9]]` to enable a 1-in-10 reroll on this table, selecting two exclusive results that are not the reroll.
+Those options can be combined (a few of those options don't even do anything on their own) to further specify the behavior of the inline roller for this specific inlined result. For example, if you want one of your results to be `Roll twice on this table, rerolling duplicates`, you can have the last result (of your arbitrary 10 results for example) written as `[[this-table:e:dd9]] and [[this-table:e:dd9]]` to enable a 1-in-10 reroll on this table, selecting two exclusive results that are not the reroll.
 
 ## Contributing
 

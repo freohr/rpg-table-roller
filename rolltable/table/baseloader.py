@@ -16,15 +16,7 @@ class BaseTableLoader:
         self.roll_config = types.SimpleNamespace()
         self.roll_config.count = count
         self.roll_config.exclusive = exclusive
-
-        if type(table_data) is str:
-            self.table = self.load_table(table_data)
-        elif type(table_data) is list:
-            self.table = table_data
-        elif Path(table_data).is_file():
-            self.table = self.load_table(table_data)
-        else:
-            raise TypeError(f"Table data is invalid when instantiating {table_data}")
+        self.table = self.load_table(table_data)
 
         if not dice_formula:
             self.roll_config.formula = None
@@ -56,7 +48,7 @@ class BaseTableLoader:
     def get_results(self):
         return []
 
-    def load_table(self, table_path):
+    def load_table(self, table_data: str):
         return []
 
     def set_flag(self, name, value):
@@ -79,13 +71,8 @@ class BaseTableLoader:
             return
 
 
-def get_table_lines(table_path: str, strip_lines: bool = True):
-    if not Path(table_path).is_file():
-        raise FileNotFoundError(f"Table file '{table_path}' not found.")
-
-    with Path(table_path).open("r") as table_content:
-        table_lines = table_content.readlines()
-        return [line.strip() if strip_lines else line for line in table_lines]
+def get_table_lines(table_data: str, strip_lines: bool = True):
+    return [line.strip() if strip_lines else line for line in table_data.split("\n")]
 
 
 def is_line_comment(line):

@@ -7,16 +7,21 @@ from pathlib import Path
 from inliner.inliner import TableInliner
 from natsort.natsort import natsorted
 
+
 def main():
     try:
         args = get_parameters()
+
         if args.ext:
             extension = Path(args.table_filepath).suffix[1:]
-            table = loader.load_table_from_extenstion(extension, args)
+            table = loader.load_table_from_extension(extension, args)
         else:
             table = loader.load_table_from_format(args.format, args)
 
-        base_table_folder = Path(args.table_filepath).parent.resolve()
+        if args.table_filepath == "-":
+            base_table_folder = Path().cwd()
+        else:
+            base_table_folder = Path(args.table_filepath).parent.resolve()
 
         recursive_table_inliner = TableInliner()
 
@@ -92,7 +97,10 @@ def get_parameters():
     )
 
     input_group = parser.add_argument_group("Input Options")
-    input_group.add_argument("table_filepath", help="path to random table config file")
+    input_group.add_argument(
+        "table_filepath",
+        help="Path to random table config file. Can be set to '-' to read the random table content from STDIN.",
+    )
     input_group.add_argument(
         "-f",
         "--format",
@@ -183,7 +191,7 @@ def get_parameters():
         "-s",
         "--sort",
         action="store_true",
-        help="Sort the results before creating output. No effect when only rolling for 1 result.",
+        help="Sort the results lexicographically (for strings) and based on expected order (for numbers). No effect when only rolling a single result. See the python package `natsort` for details",
     )
 
     args = parser.parse_args()

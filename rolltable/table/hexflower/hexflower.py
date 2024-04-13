@@ -30,12 +30,8 @@ class Hexflower(table_loader.BaseTableLoader):
 
         return results
 
-    def load_table(self, table_path):
-        if not Path(table_path).is_file():
-            raise FileNotFoundError(f"Table file '{table_path}' not found.")
+    def load_table(self, table_data):
+        json_config = json.load(table_data)
+        flower_config = Parser.parse_config(json_config)
 
-        with Path(table_path).open("r") as table_file:
-            json_config = json.load(table_file)
-            flower_config = Parser.parse_config(json_config)
-
-            return flower_config
+        return flower_config
