@@ -14,12 +14,15 @@ class NumberedListTable(table_loader.BaseTableLoader):
     ):
         super().__init__(table_data, count, exclusive, clamp, dice_formula)
 
-    def load_table(self, table_path):
-        results = table_loader.get_table_lines(table_path)
+    def load_table(self, table_data):
+        results = table_loader.get_table_lines(table_data, strip_lines=True)
 
         table_items = []
         table_weights = []
         for line in results:
+            if not line or table_loader.is_line_comment(line):
+                continue
+
             line_weight, line_item = get_line_weight(line)
             table_weights.append(line_weight)
             table_items.append(line_item)

@@ -1,4 +1,6 @@
+import sys
 from enum import Enum
+from pathlib import Path
 from table.numberedlist import NumberedListTable
 from table.chance import ChanceTable
 from table.random import RandomTable
@@ -17,9 +19,11 @@ class TableFormat(Enum):
 
 
 def load_table(table_format: TableFormat, args):
+    table_data = read_table_file(args.table_filepath)
+
     if table_format == TableFormat.List:
         return RandomTable(
-            args.table_filepath,
+            table_data,
             args.count,
             args.exclusive,
             args.clamp,
@@ -27,7 +31,7 @@ def load_table(table_format: TableFormat, args):
         )
     elif table_format == TableFormat.Chance:
         return ChanceTable(
-            args.table_filepath,
+            table_data,
             args.count,
             args.exclusive,
             args.clamp,
@@ -35,19 +39,19 @@ def load_table(table_format: TableFormat, args):
         )
     elif table_format == TableFormat.Weighted_list:
         return WeightedListTable(
-            args.table_filepath,
+            table_data,
             args.count,
             args.exclusive,
             args.clamp,
             args.dice_formula,
         )
     elif table_format == TableFormat.Hexflower:
-        return Hexflower(args.table_filepath, args.count, args.start)
+        return Hexflower(table_data, args.count, args.start)
     elif table_format == TableFormat.Template:
-        return OutputTemplate(args.table_filepath, args.count)
+        return OutputTemplate(table_data, args.count)
     elif table_format == TableFormat.NumberedList:
         return NumberedListTable(
-            args.table_filepath,
+            table_data,
             args.count,
             args.exclusive,
             args.clamp,
@@ -57,7 +61,19 @@ def load_table(table_format: TableFormat, args):
     raise ValueError(f"Unknown table format {table_format}")
 
 
-def load_table_from_extenstion(extension, args):
+def read_table_file(table_path: str):
+    if table_path == "-":
+        return "\n".join([line.rstrip("\n") for line in sys.stdin.readlines()])
+
+    if not Path(table_path).is_file():
+        raise FileNotFoundError(f"Table file '{table_path}' not found.")
+
+    with Path(table_path).open("r") as table_content:
+        table_lines = table_content.readlines()
+        return "\n".join(table_lines)
+
+
+def load_table_from_extension(extension, args):
     if extension == "table" or extension == "list":
         return load_table(TableFormat.List, args)
     elif extension == "chance":
@@ -74,7 +90,7 @@ def load_table_from_extenstion(extension, args):
     raise ValueError(f"Unknown table file extension {extension}")
 
 
-def load_table_from_format(format, args):
+def load_table_from_format(table_format, args):
     if args.format == "list":
         return load_table(TableFormat.List, args)
     elif args.format == "chance":
@@ -88,4 +104,21 @@ def load_table_from_format(format, args):
     elif args.format == "numbered-list":
         return load_table(TableFormat.NumberedList, args)
 
-    raise ValueError(f"Unknown table format option {format}")
+    raise ValueError(f"Unknown table format option {table_format}")
+
+
+def load_table_from_stdin(table_format, table_data, args):
+    if args.format == "list":
+        return load_table(TableFormat.List, args)
+    elif args.format == "chance":
+        return load_table(TableFormat.Chance, args)
+    elif args.format == "hexflower":
+        return load_table(TableFormat.Hexflower, args)
+    elif args.format == "weighted-list":
+        return load_table(TableFormat.Weighted_list, args)
+    elif args.format == "template":
+        return load_table(TableFormat.Template, args)
+    elif args.format == "numbered-list":
+        return load_table(TableFormat.NumberedList, args)
+
+    raise ValueError(f"Unknown table format option {table_format}")

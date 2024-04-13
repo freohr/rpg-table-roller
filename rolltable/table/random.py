@@ -7,7 +7,7 @@ class RandomTable(table_loader.BaseTableLoader):
     def __init__(
         self,
         table_data,
-        count=1,
+        count="1",
         exclusive=False,
         is_result_clamped=False,
         dice_formula=None,
@@ -55,12 +55,12 @@ class RandomTable(table_loader.BaseTableLoader):
 
         return results
 
-    def load_table(self, table_path):
-        table_content = table_loader.get_table_lines(table_path)
+    def load_table(self, table_data):
+        table_content = table_loader.get_table_lines(table_data, strip_lines=True)
         table = [
-            line.strip()
+            line
             for line in table_content
-            if not table_loader.is_line_comment(line) and not line.strip() == ""
+            if line and not table_loader.is_line_comment(line)
         ]
         return table
 

@@ -8,10 +8,18 @@ class ChanceTable(table_loader.BaseTableLoader):
     ):
         super().__init__(table_data, count, exclusive, clamp, dice_formula)
 
-    def load_table(self, table_path):
-        return [
-            get_line_chance(line) for line in table_loader.get_table_lines(table_path)
-        ]
+    def load_table(self, table_data: str):
+        lines = table_loader.get_table_lines(table_data, strip_lines=True)
+
+        entries = []
+
+        for line in lines:
+            if not line or table_loader.is_line_comment(line):
+                continue
+
+            entries.append(get_line_chance(line))
+
+        return entries
 
     def get_results(self):
         dice_formula = self.roll_config.formula or "d100"
@@ -35,4 +43,8 @@ def roll_occurrence(name, formula, chance):
 
 def get_line_chance(line):
     split = line.split("\t")
+
+    if len(split) != 2:
+        raise ValueError(f"Invalid chance format for item '{line}'")
+
     return split[0], int(split[1])

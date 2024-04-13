@@ -28,16 +28,16 @@ class WeightedListTable(table_loader.BaseTableLoader):
     def table_length(self):
         return sum(self.table.weights)
 
-    def load_table(self, table_path):
-        table_content = table_loader.get_table_lines(table_path)
+    def load_table(self, table_data):
+        table_content = table_loader.get_table_lines(table_data, strip_lines=True)
 
         table_items = []
         table_weights = []
         for line in table_content:
-            split_line = line.strip().split("\t")
-
-            if len(split_line) == 0 or not split_line[0]:
+            if not line or table_loader.is_line_comment(line):
                 continue
+
+            split_line = line.split("\t")
 
             potential_weight = split_line[0]
 
