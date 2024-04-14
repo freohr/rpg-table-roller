@@ -61,16 +61,32 @@ def load_table(table_format: TableFormat, args):
     raise ValueError(f"Unknown table format {table_format}")
 
 
-def read_table_file(table_path: str):
+def read_table_file(table_path):
     if table_path == "-":
         return "\n".join([line.rstrip("\n") for line in sys.stdin.readlines()])
 
-    if not Path(table_path).is_file():
+    if type(table_path) is str:
+        table_file = get_absolute_file_path(table_path)
+    else:
+        table_file = table_path
+
+    if not table_file.is_file():
         raise FileNotFoundError(f"Table file '{table_path}' not found.")
 
-    with Path(table_path).open("r") as table_content:
+    with table_file.open("r") as table_content:
         table_lines = table_content.readlines()
-        return "\n".join(table_lines)
+        return "".join(table_lines)
+
+
+def get_absolute_file_path(path_str: str, relative_to: Path = None):
+    if path_str.find("~") == 0:
+        return Path(path_str).expanduser()
+    elif path_str.find("/") == 0:
+        return Path(path_str).resolve()
+    elif relative_to:
+        return (relative_to / path_str).resolve()
+    else:
+        return Path(path_str).resolve()
 
 
 def load_table_from_extension(extension, args):
