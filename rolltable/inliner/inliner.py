@@ -1,5 +1,6 @@
 import dice
 import re
+import loader
 from table.numberedlist import NumberedListTable
 from table.random import RandomTable
 from table.chance import ChanceTable
@@ -72,16 +73,18 @@ class TableReferenceCounter:
 
 
 def create_table(table_info):
+    table_data = loader.read_table_file(table_info.table_path)
+
     if not table_info.format or table_info.format == "list":
-        return RandomTable(table_info.table_path)
+        return RandomTable(table_data)
     elif table_info.format == "chance":
-        return ChanceTable(table_info.table_path)
+        return ChanceTable(table_data)
     elif table_info.format == "weighted-list":
-        return WeightedListTable(table_info.table_path)
+        return WeightedListTable(table_data)
     elif table_info.format == "template":
-        return OutputTemplate(table_info.table_path, table_info.count)
+        return OutputTemplate(table_data, table_info.count)
     elif table_info.format == "numbered-list":
-        return NumberedListTable(table_info.table_path)
+        return NumberedListTable(table_data)
     else:
         raise ValueError(
             f"Unknown table format {table_info.format}"
@@ -155,7 +158,7 @@ class TableInliner:
                     else ", "
                 )
 
-                sort = (formula_options.group("sort") is not None)
+                sort = formula_options.group("sort") is not None
 
                 rolls = [f"{int(dice.roll(base_roll))}" for _ in range(count)]
 
@@ -170,9 +173,7 @@ class TableInliner:
         return new_string
 
     @staticmethod
-    def parse_inline_table_info(
-            extracted_inlined_table, current_table_folder: Path
-    ):
+    def parse_inline_table_info(extracted_inlined_table, current_table_folder: Path):
         parsed_info = TableInliner.inline_element_option_parser.match(
             extracted_inlined_table
         )
@@ -182,22 +183,24 @@ class TableInliner:
                 f"Invalid inline table format: '{extracted_inlined_table}'"
             )
 
-        inline_table_path = (
-            current_table_folder / parsed_info.group("element")
-        ).resolve()
+        inline_table_path = loader.get_absolute_file_path(
+            parsed_info.group("element"), current_table_folder
+        )
 
         return InlineTableInfo(
             inline_table_path,
             parsed_info.group("inline_format") if parsed_info.group("format") else None,
             parsed_info.group("exclusive") is not None,
             parsed_info.group("clamp") is not None,
-            parsed_info.group("inline_formula")
-            if parsed_info.group("formula")
-            else None,
+            (
+                parsed_info.group("inline_formula")
+                if parsed_info.group("formula")
+                else None
+            ),
             parsed_info.group("roll_count") if parsed_info.group("count") else None,
             parsed_info.group("inline_joiner") if parsed_info.group("joiner") else None,
             parsed_info.group("extension") is not None,
-            parsed_info.group("sort") is not None
+            parsed_info.group("sort") is not None,
         )
 
     def roll_inline_tables(self, rolled_result: str, current_table_folder: Path):

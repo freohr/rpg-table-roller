@@ -13,7 +13,7 @@ def main():
         args = get_parameters()
 
         if args.ext:
-            extension = Path(args.table_filepath).suffix[1:]
+            extension = loader.get_absolute_file_path(args.table_filepath).suffix[1:]
             table = loader.load_table_from_extension(extension, args)
         else:
             table = loader.load_table_from_format(args.format, args)
@@ -21,7 +21,9 @@ def main():
         if args.table_filepath == "-":
             base_table_folder = Path().cwd()
         else:
-            base_table_folder = Path(args.table_filepath).parent.resolve()
+            base_table_folder = loader.get_absolute_file_path(
+                args.table_filepath
+            ).parent
 
         recursive_table_inliner = TableInliner()
 
