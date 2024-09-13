@@ -41,7 +41,7 @@ class InlineTableInfo:
         self.clamp = clamp
         self.formula = formula if formula is not None else ""
         self.count = int(dice.roll(count)) if count is not None else 1
-        self.joiner = joiner if joiner is not None else ", "
+        self.joiner = joiner.encode("utf-8").decode("unicode-escape") if joiner is not None else ", "
         self.sort = sort
 
     def __eq__(self, other):
@@ -153,7 +153,7 @@ class TableInliner:
                 count = int(dice.roll(count_formula))
 
                 joiner = (
-                    formula_options.group("inline_joiner")
+                    formula_options.group("inline_joiner").encode("utf-8").decode("unicode-escape")
                     if formula_options.group("joiner")
                     else ", "
                 )
