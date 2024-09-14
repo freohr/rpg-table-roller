@@ -12,16 +12,16 @@ from natsort import natsorted
 
 class InlineTableInfo:
     def __init__(
-        self,
-        canonical_path: Path,
-        table_format=None,
-        exclusive=False,
-        clamp=False,
-        formula=None,
-        count=None,
-        joiner=None,
-        format_from_extension=False,
-        sort=False,
+            self,
+            canonical_path: Path,
+            table_format=None,
+            exclusive=False,
+            clamp=False,
+            formula=None,
+            count=None,
+            joiner=None,
+            format_from_extension=False,
+            sort=False,
     ):
         self.table_path = canonical_path
 
@@ -46,11 +46,11 @@ class InlineTableInfo:
 
     def __eq__(self, other):
         return (
-            self.table_path == other.table_path
-            and self.format == other.format
-            and self.exclusive == other.exclusive
-            and self.clamp == other.clamp
-            and self.formula == other.formula
+                self.table_path == other.table_path
+                and self.format == other.format
+                and self.exclusive == other.exclusive
+                and self.clamp == other.clamp
+                and self.formula == other.formula
         )
 
     def __hash__(self):
@@ -240,15 +240,23 @@ class TableInliner:
             for index, replacer_info in ref_counter.indices.items():
                 # Get as many results as needed to replace a single marker
                 result_slicer = slice(0, replacer_info["count"])
-                replacer_string = replacer_info["joiner"].join(results[result_slicer])
 
+                # Grab the specific results to be inlined
+                intermediate_results = results[result_slicer]
                 del results[result_slicer]
+
+                if isinstance(intermediate_results[0], list):
+                    replacer_string = replacer_info["joiner"].join([
+                        replacer_info["joiner"].join(res) for res in intermediate_results
+                    ])
+                else:
+                    replacer_string = replacer_info["joiner"].join(intermediate_results)
 
                 # Recursively replace inlined tables
                 while (
-                    replaced_result := self.roll_inline_tables(
-                        replacer_string, table_info.table_path.parent
-                    )
+                        replaced_result := self.roll_inline_tables(
+                            replacer_string, table_info.table_path.parent
+                        )
                 ) != replacer_string:
                     replacer_string = replaced_result
 
